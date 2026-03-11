@@ -3,8 +3,16 @@ import { loadStripe, Stripe } from '@stripe/stripe-js';
 /**
  * Stripe Integration Utility
  * ─────────────────────────────────────────────────────────────────────────────
- * Manages Stripe payment processing with Elements and Payment Intent
+ * All API calls use VITE_API_URL so they reach the backend on Render
+ * (not the Vercel frontend server which has no /api/stripe routes).
  */
+
+// ── Runtime API base URL ──────────────────────────────────────────────────────
+// In production this is the Render backend URL (set in Vercel env vars).
+// In local dev it falls back to localhost:5000.
+const API_BASE =
+    import.meta.env.VITE_API_URL ||
+    'http://localhost:5000/api';
 
 let stripePromise: Promise<Stripe | null>;
 
@@ -61,7 +69,7 @@ export const createPaymentIntent = async (paymentData: StripePaymentData, token?
         const authToken = token || getStoredToken();
         if (!authToken) throw new Error('No authentication token');
 
-        const response = await fetch('/api/stripe/create-intent', {
+        const response = await fetch(`${API_BASE}/stripe/create-intent`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -90,7 +98,7 @@ export const confirmPaymentOnBackend = async (paymentIntentId: string, token?: s
         const authToken = token || getStoredToken();
         if (!authToken) throw new Error('No authentication token');
 
-        const response = await fetch('/api/stripe/confirm-payment', {
+        const response = await fetch(`${API_BASE}/stripe/confirm-payment`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -112,14 +120,14 @@ export const confirmPaymentOnBackend = async (paymentIntentId: string, token?: s
 };
 
 /**
- * Get Stripe Publishable Key (with explicit token parameter)
+ * Get Stripe Publishable Key from backend
  */
 export const getPublishableKeyWithToken = async (token: string) => {
     try {
         if (!token) throw new Error('No authentication token provided');
 
-        console.log('Fetching Stripe key from /api/stripe/key');
-        const response = await fetch('/api/stripe/key', {
+        console.log('[Stripe] Fetching publishable key from backend...');
+        const response = await fetch(`${API_BASE}/stripe/key`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -131,10 +139,10 @@ export const getPublishableKeyWithToken = async (token: string) => {
         }
 
         const data = await response.json();
-        console.log('Stripe key received successfully');
+        console.log('[Stripe] Publishable key received ✅');
         return data;
     } catch (error) {
-        console.error('Get Publishable Key Error:', error);
+        console.error('[Stripe] Get Publishable Key Error:', error);
         throw error;
     }
 };
@@ -143,15 +151,9 @@ export const getPublishableKeyWithToken = async (token: string) => {
  * Get Stripe Publishable Key
  */
 export const getPublishableKey = async () => {
-    try {
-        const token = getStoredToken();
-        if (!token) throw new Error('No authentication token found');
-
-        return getPublishableKeyWithToken(token);
-    } catch (error) {
-        console.error('Get Publishable Key Error:', error);
-        throw error;
-    }
+    const token = getStoredToken();
+    if (!token) throw new Error('No authentication token found');
+    return getPublishableKeyWithToken(token);
 };
 
 /**
@@ -162,7 +164,7 @@ export const refundPayment = async (paymentIntentId: string, reason?: string) =>
         const token = getStoredToken();
         if (!token) throw new Error('No authentication token');
 
-        const response = await fetch('/api/stripe/refund', {
+        const response = await fetch(`${API_BASE}/stripe/refund`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
