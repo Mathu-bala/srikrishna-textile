@@ -1,9 +1,13 @@
 const mongoose = require('mongoose');
 
-const inventorySchema = mongoose.Schema({
-    product: {
+const inventorySchema = new mongoose.Schema({
+    productId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product',
+        required: true
+    },
+    productName: {
+        type: String,
         required: true
     },
     sku: {
@@ -12,55 +16,43 @@ const inventorySchema = mongoose.Schema({
         unique: true
     },
     variant: {
-        size: { type: String },
-        color: { type: String },
-        material: { type: String }
+        type: String,
+        default: 'Standard'
     },
-    stock: {
-        total: { type: Number, required: true, default: 0 }, // Physical count
-        reserved: { type: Number, default: 0 }, // In active orders
-        sold: { type: Number, default: 0 }, // Completed sales
-        threshold: { type: Number, default: 5 } // Low stock alert level
+    stockLevel: {
+        type: Number,
+        required: true,
+        default: 0
     },
-    pricing: {
-        costPrice: { type: Number, required: true, default: 0 },
-        sellingPrice: { type: Number, required: true, default: 0 },
-        tax: { type: Number, default: 0 },
-        discount: { type: Number, default: 0 }
+    price: {
+        type: Number,
+        required: true,
+        default: 0
     },
-    supplier: {
-        name: { type: String },
-        contact: { type: String },
-        invoiceNumber: { type: String },
-        lastRestockDate: { type: Date }
+    totalValue: {
+        type: Number,
+        default: 0
     },
-    history: [{
-        action: {
-            type: String,
-            enum: ['restock', 'sold', 'reserved', 'adjustment', 'return', 'cancel']
-        },
-        quantity: { type: Number },
-        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        date: { type: Date, default: Date.now },
-        currentStock: { type: Number }, // Snapshot after action
-        notes: { type: String }
-    }]
+    status: {
+        type: String,
+        enum: ['In Stock', 'Low Stock', 'Out of Stock'],
+        default: 'Out of Stock'
+    }
 }, {
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    timestamps: true
 });
 
-// Virtual for available stock
-inventorySchema.virtual('availableStock').get(function () {
-    return this.stock.total - this.stock.reserved;
-});
+// Auto Status Logic & Total Value
+inventorySchema.pre('save', function () {
+    this.totalValue = this.stockLevel * this.price;
 
-// Virtual for status
-inventorySchema.virtual('status').get(function () {
-    if (this.availableStock <= 0) return 'Out of Stock';
-    if (this.availableStock <= this.stock.threshold) return 'Low Stock';
-    return 'In Stock';
+    if (this.stockLevel > 10) {
+        this.status = 'In Stock';
+    } else if (this.stockLevel >= 1 && this.stockLevel <= 10) {
+        this.status = 'Low Stock';
+    } else {
+        this.status = 'Out of Stock';
+    }
 });
 
 module.exports = mongoose.model('Inventory', inventorySchema);

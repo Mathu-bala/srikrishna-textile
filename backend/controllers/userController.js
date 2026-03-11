@@ -12,6 +12,9 @@ const getUserProfile = async (req, res) => {
             name: user.name,
             email: user.email,
             isAdmin: user.isAdmin,
+            phone: user.phone,
+            address: user.address,
+            profilePhoto: user.profilePhoto,
         });
     } else {
         res.status(404).json({ message: 'User not found' });
@@ -27,6 +30,9 @@ const updateUserProfile = async (req, res) => {
     if (user) {
         user.name = req.body.name || user.name;
         user.email = req.body.email || user.email;
+        if (req.body.phone !== undefined) user.phone = req.body.phone;
+        if (req.body.address !== undefined) user.address = req.body.address;
+        if (req.body.profilePhoto !== undefined) user.profilePhoto = req.body.profilePhoto;
 
         if (req.body.password) {
             user.password = req.body.password;
@@ -39,6 +45,9 @@ const updateUserProfile = async (req, res) => {
             name: updatedUser.name,
             email: updatedUser.email,
             isAdmin: updatedUser.isAdmin,
+            phone: updatedUser.phone,
+            address: updatedUser.address,
+            profilePhoto: updatedUser.profilePhoto,
             token: generateToken(updatedUser._id),
         });
     } else {

@@ -43,6 +43,72 @@ export const registerUser = async (name: string, email: string, password: string
     return res.json();
 };
 
+// Social Login — called after Firebase OAuth succeeds
+export const socialLoginUser = async (
+    name: string,
+    email: string,
+    photoURL: string,
+    provider: 'google' | 'facebook',
+): Promise<any> => {
+    const res = await fetch(`${API_URL}/auth/social`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, photoURL, provider }),
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Social login failed');
+    }
+    return res.json();
+};
+
+// ─── Auth Headers (used by all protected routes) ──────────────────────────
+const getAuthHeaders = () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${user.token}`
+    };
+};
+
+// ─── Payment APIs ────────────────────────────────────────────────────────────
+
+/** Place a Cash on Delivery order */
+export const placeCODOrder = async (data: {
+    items: any[];
+    shippingAddress: string;
+    total: number;
+    couponCode?: string;
+    discount?: number;
+}): Promise<{ success: boolean; orderId: string; estimatedDelivery: string }> => {
+    const res = await fetch(`${API_URL}/payment/cod-order`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: `Server error (${res.status})` }));
+        throw new Error(errorData.message || 'Failed to place COD order');
+    }
+    return res.json();
+};
+
+/** Validate a coupon code */
+export const validateCoupon = async (code: string, subtotal: number): Promise<{
+    valid: boolean;
+    discount: number;
+    message: string;
+}> => {
+    const res = await fetch(`${API_URL}/payment/validate-coupon`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ code, subtotal }),
+    });
+    const data = await res.json().catch(() => ({ valid: false, discount: 0, message: 'Server error' }));
+    return data;
+};
+
+
 export const getSearchSuggestions = async (query: string): Promise<Product[]> => {
     if (!query) return [];
     const res = await fetch(`${API_URL}/search?q=${encodeURIComponent(query)}`);
@@ -51,13 +117,6 @@ export const getSearchSuggestions = async (query: string): Promise<Product[]> =>
 };
 
 // Admin User Management
-const getAuthHeaders = () => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${user.token}`
-    };
-};
 
 export const getAdminUsers = async (search?: string, page: number = 1, limit: number = 10): Promise<any> => {
     const url = new URL(`${API_URL}/admin/users`);
@@ -205,11 +264,14 @@ export const deleteProduct = async (id: string): Promise<any> => {
 
 // Admin Inventory Management
 export const getInventoryItems = async (page: number = 1, keyword: string = ''): Promise<any> => {
-    const url = new URL(`${API_URL}/inventory`);
-    url.searchParams.append('pageNumber', String(page));
-    if (keyword) url.searchParams.append('keyword', keyword);
+    let urlStr = `${API_URL}/inventory`;
+    if (keyword) {
+        urlStr = `${API_URL}/inventory/search?q=${keyword}&pageNumber=${page}`;
+    } else {
+        urlStr = `${API_URL}/inventory?pageNumber=${page}`;
+    }
 
-    const res = await fetch(url.toString(), {
+    const res = await fetch(urlStr, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error('Failed to fetch inventory');
@@ -217,39 +279,55 @@ export const getInventoryItems = async (page: number = 1, keyword: string = ''):
 };
 
 export const getInventoryStats = async (): Promise<any> => {
-    const res = await fetch(`${API_URL}/inventory/stats/metrics`, {
+    const res = await fetch(`${API_URL}/inventory/stats`, {
         headers: getAuthHeaders()
     });
     if (!res.ok) throw new Error('Failed to fetch inventory stats');
     return res.json();
 };
 
-export const adjustInventoryStock = async (id: string, data: { action: string, quantity: number, notes?: string }): Promise<any> => {
-    const res = await fetch(`${API_URL}/inventory/${id}/adjust`, {
-        method: 'POST',
+export const adjustInventoryStock = async (id: string, data: { stockLevel?: number, price?: number, variant?: string }): Promise<any> => {
+    const res = await fetch(`${API_URL}/inventory/update/${id}`, {
+        method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify(data)
     });
-    if (!res.ok) throw new Error('Failed to adjust stock');
+    if (!res.ok) throw new Error('Failed to update stock');
     return res.json();
 };
 
 export const createInventoryItem = async (data: any): Promise<any> => {
-    const res = await fetch(`${API_URL}/inventory`, {
+    const res = await fetch(`${API_URL}/inventory/add`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(data)
     });
-    if (!res.ok) throw new Error('Failed to create inventory item');
+    if (!res.ok) throw new Error('Failed to add inventory record');
+    return res.json();
+};
+
+export const deleteInventoryItem = async (id: string): Promise<any> => {
+    const res = await fetch(`${API_URL}/inventory/delete/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to delete inventory record');
     return res.json();
 };
 
 export const syncInventoryItems = async (): Promise<any> => {
-    const res = await fetch(`${API_URL}/inventory/sync`, {
+    const res = await fetch(`${API_URL}/inventory/sync-products`, {
         method: 'POST',
         headers: getAuthHeaders()
     });
-    if (!res.ok) throw new Error('Failed to sync inventory');
+    if (!res.ok) {
+        let errStr = 'Failed to sync inventory';
+        try {
+            const errJson = await res.json();
+            if (errJson && errJson.message) errStr = errJson.message;
+        } catch(e) {}
+        throw new Error(errStr);
+    }
     return res.json();
 };
 
@@ -290,5 +368,24 @@ export const submitSupportRequest = async (data: { name: string, email: string, 
         body: JSON.stringify(data)
     });
     if (!res.ok) throw new Error('Failed to submit support request');
+    return res.json();
+};
+
+// User Profile
+export const getUserProfile = async (): Promise<any> => {
+    const res = await fetch(`${API_URL}/user/profile`, {
+        headers: getAuthHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to fetch user profile');
+    return res.json();
+};
+
+export const updateUserProfile = async (profileData: any): Promise<any> => {
+    const res = await fetch(`${API_URL}/user/profile`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(profileData)
+    });
+    if (!res.ok) throw new Error('Failed to update user profile');
     return res.json();
 };

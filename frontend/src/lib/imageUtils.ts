@@ -1,5 +1,5 @@
 
-const images = import.meta.glob('@/assets/products/*.{png,jpg,jpeg,svg,webp}', { eager: true, as: 'url' });
+const images = import.meta.glob('@/assets/products/*.{png,jpg,jpeg,svg,webp}', { eager: true, query: '?url', import: 'default' });
 
 export const getImageUrl = (imageName: string): string => {
     // If absolute URL (http/https), return as is (fallback for existing data)

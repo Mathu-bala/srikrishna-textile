@@ -80,11 +80,19 @@ const ContactUs = () => {
                                             <MessageCircle size={24} />
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold mb-1">WhatsApp Support</h3>
-                                            <p className="text-muted-foreground text-sm mb-2">Chat with us for quick responses.</p>
-                                            <Button variant="outline" className="border-secondary/50 text-secondary hover:bg-secondary/10" onClick={() => window.open('https://wa.me/919876543210', '_blank')}>
-                                                Chat on WhatsApp
-                                            </Button>
+                                            <h3 className="font-semibold mb-1 text-foreground">WhatsApp Support</h3>
+                                            <p className="text-muted-foreground text-sm mb-3">Chat with us for quick responses.</p>
+                                            <a 
+                                              href="https://wa.me/919786632306?text=Hello%20SriKrishna%20Premium%20Fashion%20I%20would%20like%20to%20know%20more%20about%20your%20products" 
+                                              target="_blank" 
+                                              rel="noopener noreferrer"
+                                              className="inline-block"
+                                            >
+                                              <button className="bg-[#25D366] text-white px-5 py-3 rounded-lg border-none font-bold cursor-pointer shadow-[0_4px_10px_rgba(37,211,102,0.3)] hover:shadow-[0_0_15px_rgba(37,211,102,0.6)] flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95">
+                                                  <MessageCircle size={18} className="fill-current" />
+                                                  Chat on WhatsApp
+                                              </button>
+                                            </a>
                                         </div>
                                     </div>
 

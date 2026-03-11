@@ -72,7 +72,7 @@ const HeroSection = () => {
   }, [emblaApi]);
 
   return (
-    <div className="relative w-full h-[600px] md:h-[700px] lg:h-[800px] bg-background text-foreground overflow-hidden">
+    <div className="relative w-full h-auto min-h-[400px] md:h-[420px] bg-background text-foreground overflow-hidden">
       {/* Carousel */}
       <div className="overflow-hidden h-full" ref={emblaRef}>
         <div className="flex touch-pan-y h-full">
@@ -90,21 +90,20 @@ const HeroSection = () => {
               </div>
 
               {/* Content */}
-              <div className="relative z-10 h-full container-custom flex items-center">
-                <div className="max-w-2xl text-white space-y-6 animate-fade-in-up">
-                  <h1 className="text-4xl md:text-5xl lg:text-7xl font-display font-bold leading-tight drop-shadow-lg">
+              <div className="relative z-10 h-full container-custom flex items-center justify-center sm:justify-start">
+                <div className="max-w-2xl text-white space-y-4 sm:space-y-6 animate-fade-in-up px-5 sm:px-0 text-center sm:text-left flex flex-col items-center sm:items-start">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-display font-bold leading-tight drop-shadow-lg">
                     {slide.title}
                   </h1>
-                  <p className="text-lg md:text-2xl text-gray-200 font-light max-w-lg drop-shadow-md">
+                  <p className="text-base sm:text-lg md:text-2xl text-gray-200 font-light max-w-lg drop-shadow-md">
                     {slide.subtitle}
                   </p>
                   <div className="pt-4">
                     <Button
-                      size="lg"
                       onClick={() => navigate(slide.link)}
-                      className="text-lg px-8 py-6 rounded-full bg-white text-black hover:bg-gray-100 border-none transition-transform hover:scale-105"
+                      className="h-[36px] px-[12px] py-[8px] text-[14px] rounded-[8px] sm:h-[40px] sm:px-[16px] sm:py-[10px] sm:text-[15px] lg:h-auto lg:px-8 lg:py-6 lg:text-lg lg:rounded-full bg-white text-black hover:bg-gray-100 border-none transition-transform hover:scale-105"
                     >
-                      <ShoppingBag className="mr-2 h-5 w-5" />
+                      <ShoppingBag className="mr-1 sm:mr-2 w-[16px] h-[16px] sm:w-[18px] sm:h-[18px] lg:w-5 lg:h-5" />
                       {slide.cta}
                     </Button>
                   </div>

@@ -22,6 +22,11 @@ import Notifications from "./pages/Notifications";
 import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
 import BuyNowCheckout from "./pages/BuyNowCheckout";
+import PaymentFailed from "./pages/PaymentFailed";
+import UserProfile from "./pages/UserProfile";
+import AdminProfile from "./pages/AdminProfile";
+import FloatingWhatsApp from "@/components/layout/FloatingWhatsApp";
+
 
 const queryClient = new QueryClient();
 
@@ -45,14 +50,19 @@ const App = () => (
                     <Route path="/login" element={<Login />} />
                     <Route path="/wishlist" element={<Wishlist />} />
                     <Route path="/my-orders" element={<MyOrders />} />
-                    <Route path="/track-order/:orderId" element={<TrackOrder />} />
+                    <Route path="/orders/:orderId" element={<TrackOrder />} />
                     <Route path="/order-success" element={<OrderSuccess />} />
                     <Route path="/notifications" element={<Notifications />} />
                     <Route path="/contact" element={<ContactUs />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/checkout" element={<BuyNowCheckout />} />
+                    <Route path="/payment-failed" element={<PaymentFailed />} />
+                    <Route path="/profile" element={<UserProfile />} />
+                    <Route path="/admin/profile" element={<AdminProfile />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
+                  <FloatingWhatsApp />
                 </BrowserRouter>
               </TooltipProvider>
             </OrderProvider>

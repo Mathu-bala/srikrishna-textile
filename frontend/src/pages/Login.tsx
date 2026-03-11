@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import SocialLoginButtons from '@/components/auth/SocialLoginButtons';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -162,6 +163,9 @@ const Login = () => {
                 {isLogin ? 'Sign In' : 'Create Account'}
               </Button>
             </form>
+
+            {/* Social Login — modular, optional, zero impact on email login */}
+            <SocialLoginButtons />
 
             {/* Toggle */}
             <p className="text-center mt-6 text-muted-foreground">

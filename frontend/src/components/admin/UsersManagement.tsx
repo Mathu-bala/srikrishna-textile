@@ -257,7 +257,7 @@ const UsersManagement = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <p className="text-xs text-muted-foreground uppercase font-semibold">Phone Number</p>
                                     <p className="flex items-center gap-2"><Phone size={14} className="text-primary" /> {selectedUser.phone || 'N/A'}</p>
@@ -272,7 +272,7 @@ const UsersManagement = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/30">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border/30">
                                 <div className="bg-muted/30 p-3 rounded-lg text-center">
                                     <p className="text-2xl font-bold text-secondary">{selectedUser.orderCount}</p>
                                     <p className="text-xs text-muted-foreground uppercase">Total Orders</p>

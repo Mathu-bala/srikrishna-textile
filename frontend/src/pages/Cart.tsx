@@ -6,7 +6,6 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { useOrders } from '@/context/OrderContext';
 
 import { fetchProducts } from '@/services/api';
 import { Product } from '@/data/products';
@@ -16,7 +15,6 @@ import { getImageUrl } from '@/lib/imageUtils';
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
   const { isAuthenticated, setReturnUrl, logout } = useAuth();
-  const { addOrder } = useOrders();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -46,44 +44,24 @@ const Cart = () => {
     loadRelated();
   }, [cartItems]);
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (!isAuthenticated) {
       setReturnUrl('/cart');
       navigate('/login');
       return;
     }
 
-    setLoading(true);
-    try {
-      // Create order
-      const order = await addOrder(
-        cartItems.map((item) => ({
-          product: item.product,
-          quantity: item.quantity,
-          size: item.size,
-          color: item.color,
-        })),
-        grandTotal
-      );
+    // Store cart items in sessionStorage for the checkout/payment page
+    const checkoutData = cartItems.map(item => ({
+      ...item.product,
+      quantity: item.quantity,
+      selectedSize: item.size || '',
+      selectedColor: item.color || '',
+    }));
+    sessionStorage.setItem('buyNowCart', JSON.stringify(checkoutData));
 
-      // Clear cart
-      clearCart();
-
-      // Navigate to success page
-      navigate(`/order-success?orderId=${order.id}`);
-    } catch (error) {
-      console.error('Checkout failed:', error);
-      const message = error instanceof Error ? error.message : 'Checkout failed';
-      if (message.includes('Not authorized') || message.includes('token failed')) {
-        alert('Session expired. Please login again.');
-        logout();
-        navigate('/login');
-      } else {
-        alert(message);
-      }
-    } finally {
-      setLoading(false);
-    }
+    // Navigate to payment page — order will only be created after payment succeeds
+    navigate('/buy-now-checkout');
   };
 
   if (cartItems.length === 0) {
@@ -135,13 +113,13 @@ const Cart = () => {
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
                 <div
-                  key={`${item.product.id}-${item.size}-${item.color}`}
+                  key={`${item.product?.id || Math.random()}-${item.size}-${item.color}`}
                   className="glass-card p-4 flex gap-4"
                 >
-                  <Link to={`/product/${item.product.id}`}>
+                  <Link to={`/product/${item.product?.id}`}>
                     <img
-                      src={getImageUrl(item.product.image)}
-                      alt={item.product.name}
+                      src={getImageUrl(item.product?.image || '')}
+                      alt={item.product?.name || 'Unknown'}
                       className="w-24 h-32 object-cover rounded-lg"
                     />
                   </Link>
@@ -149,10 +127,10 @@ const Cart = () => {
                     <div className="flex justify-between">
                       <div>
                         <Link
-                          to={`/product/${item.product.id}`}
+                          to={`/product/${item.product?.id}`}
                           className="font-medium text-foreground hover:text-secondary transition-colors"
                         >
-                          {item.product.name}
+                          {item.product?.name || 'Unknown Product'}
                         </Link>
                         <p className="text-sm text-muted-foreground mt-1">
                           {item.size && `Size: ${item.size}`}
@@ -160,7 +138,7 @@ const Cart = () => {
                         </p>
                       </div>
                       <button
-                        onClick={() => removeFromCart(item.product.id)}
+                        onClick={() => item.product?.id && removeFromCart(item.product.id)}
                         className="text-muted-foreground hover:text-destructive transition-colors"
                       >
                         <Trash2 size={18} />
@@ -171,7 +149,7 @@ const Cart = () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() =>
-                            updateQuantity(item.product.id, item.quantity - 1)
+                            item.product?.id && updateQuantity(item.product.id, item.quantity - 1)
                           }
                           className="w-8 h-8 border border-border/50 rounded-lg flex items-center justify-center hover:bg-muted/50 hover:border-secondary/50 transition-colors"
                         >
@@ -180,7 +158,7 @@ const Cart = () => {
                         <span className="w-8 text-center">{item.quantity}</span>
                         <button
                           onClick={() =>
-                            updateQuantity(item.product.id, item.quantity + 1)
+                            item.product?.id && updateQuantity(item.product.id, item.quantity + 1)
                           }
                           className="w-8 h-8 border border-border/50 rounded-lg flex items-center justify-center hover:bg-muted/50 hover:border-secondary/50 transition-colors"
                         >
@@ -188,7 +166,7 @@ const Cart = () => {
                         </button>
                       </div>
                       <p className="font-display font-bold text-lg">
-                        ₹{(item.product.price * item.quantity).toLocaleString()}
+                        ₹{((item.product?.price || 0) * item.quantity).toLocaleString()}
                       </p>
                     </div>
                   </div>

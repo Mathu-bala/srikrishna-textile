@@ -26,13 +26,13 @@ export const ThemeSwitcher = () => {
                 variant="ghost"
                 size="icon"
                 onClick={toggleMode}
-                className="rounded-full w-9 h-9 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+                className="rounded-full w-auto h-auto p-2 hover:bg-primary/10 hover:text-primary transition-all duration-300"
                 title={mode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
                 {mode === 'dark' ? (
-                    <Sun size={20} className="animate-in zoom-in duration-300" />
+                    <Sun className="w-[20px] h-[20px] sm:w-[22px] sm:h-[22px] lg:w-[24px] lg:h-[24px] animate-in zoom-in duration-300" />
                 ) : (
-                    <Moon size={20} className="animate-in zoom-in duration-300" />
+                    <Moon className="w-[20px] h-[20px] sm:w-[22px] sm:h-[22px] lg:w-[24px] lg:h-[24px] animate-in zoom-in duration-300" />
                 )}
             </Button>
 
@@ -42,10 +42,10 @@ export const ThemeSwitcher = () => {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="rounded-full w-9 h-9 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+                        className="rounded-full w-auto h-auto p-2 hover:bg-primary/10 hover:text-primary transition-all duration-300"
                         title="Change Accent Color"
                     >
-                        <Palette size={20} />
+                        <Palette className="w-[20px] h-[20px] sm:w-[22px] sm:h-[22px] lg:w-[24px] lg:h-[24px]" />
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-48 bg-card/90 backdrop-blur-xl border-border/50 p-3" align="end">

@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -131,7 +131,7 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden w-[100vw] max-w-[100vw];
     font-family: 'Inter', sans-serif;
     transition: background-color var(--transition-speed), color var(--transition-speed);
   }
@@ -148,7 +148,7 @@
 
 @layer components {
   .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply w-full max-w-full px-[12px] md:mx-auto md:max-w-[720px] md:px-[16px] lg:mx-auto lg:max-w-[1280px] lg:px-[24px];
   }
 
   .btn-neon {
@@ -217,6 +217,19 @@
 
     50% {
       box-shadow: 0 0 40px hsla(var(--primary) / 0.6);
+    }
+  }
+
+  .animate-badge-pulse {
+    animation: badgePulse 3s infinite ease-in-out;
+  }
+
+  @keyframes badgePulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
     }
   }
 }

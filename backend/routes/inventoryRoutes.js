@@ -1,21 +1,35 @@
 const express = require('express');
 const router = express.Router();
 const {
+    addInventory,
     getInventory,
-    getInventoryById,
-    createInventoryItem,
-    updateInventoryItem,
-    adjustStock,
-    getInventoryStats,
-    syncInventory
+    updateInventory,
+    deleteInventory,
+    searchInventory,
+    getStats,
+    syncFromProducts
 } = require('../controllers/inventoryController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// All routes are protected and admin only
-router.route('/sync').post(protect, admin, syncInventory);
-router.route('/').get(protect, admin, getInventory).post(protect, admin, createInventoryItem);
-router.route('/stats/metrics').get(protect, admin, getInventoryStats);
-router.route('/:id').get(protect, admin, getInventoryById).put(protect, admin, updateInventoryItem);
-router.route('/:id/adjust').post(protect, admin, adjustStock);
+// POST /api/inventory/add
+router.post('/add', protect, admin, addInventory);
+
+// GET /api/inventory
+router.get('/', protect, admin, getInventory);
+
+// PUT /api/inventory/update/:id
+router.put('/update/:id', protect, admin, updateInventory);
+
+// DELETE /api/inventory/delete/:id
+router.delete('/delete/:id', protect, admin, deleteInventory);
+
+// GET /api/inventory/search?q=
+router.get('/search', protect, admin, searchInventory);
+
+// GET /api/inventory/stats
+router.get('/stats', protect, admin, getStats);
+
+// POST /api/inventory/sync-products
+router.post('/sync-products', protect, admin, syncFromProducts);
 
 module.exports = router;

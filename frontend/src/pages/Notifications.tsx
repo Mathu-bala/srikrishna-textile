@@ -89,7 +89,7 @@ const Notifications = () => {
                 // For now let's just go to dashboard, or if user go to order tracking
                 navigate('/admin');
             } else {
-                navigate(`/track-order/${notification.relatedId}`);
+                navigate(`/orders/${notification.relatedId}`);
             }
         } else if (notification.type === 'system' && notification.relatedId) {
             // Like "system" for new products, navigate to product

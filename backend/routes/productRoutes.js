@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const { protect, admin } = require('../middleware/authMiddleware');
 const { createNotification } = require('../controllers/notificationController');
@@ -56,7 +57,20 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
     try {
-        const product = await Product.findOne({ id: req.params.id });
+        const { id } = req.params;
+        let product = null;
+
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            product = await Product.findOne({ 
+                $or: [
+                    { _id: new mongoose.Types.ObjectId(id) }, 
+                    { id: id }
+                ] 
+            });
+        } else {
+            product = await Product.findOne({ id: id });
+        }
+
         if (!product) return res.status(404).json({ message: 'Product not found' });
         res.json(product);
     } catch (error) {

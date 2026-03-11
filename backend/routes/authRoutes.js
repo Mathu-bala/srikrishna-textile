@@ -78,4 +78,54 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Social Login (Google / Facebook via Firebase token)
+// POST /api/auth/social
+// Body: { name, email, photoURL, provider }
+router.post('/social', async (req, res) => {
+    const { name, email, photoURL, provider } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ message: 'Email is required for social login' });
+    }
+
+    try {
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // New social user — create without password
+            user = await User.create({
+                name: name || email.split('@')[0],
+                email,
+                password: null,
+                profilePhoto: photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+            });
+
+            // Notify admin about new social registration
+            await createNotification({
+                message: `New user via ${provider || 'social'}: ${user.name}`,
+                type: 'system',
+                isAdmin: true,
+                relatedId: user._id,
+            });
+        } else {
+            // Existing user — update photo if provided
+            if (photoURL && user.profilePhoto !== photoURL) {
+                user.profilePhoto = photoURL;
+            }
+            user.lastLogin = Date.now();
+            await user.save();
+        }
+
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            isAdmin: user.isAdmin,
+            token: generateToken(user._id),
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;

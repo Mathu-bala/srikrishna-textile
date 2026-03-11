@@ -31,10 +31,11 @@ const CategoriesSection = () => {
               className="group flex flex-col items-center animate-slide-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden mb-4 shadow-sm group-hover:shadow-md transition-shadow bg-muted">
+              <div className="w-full aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden mb-4 shadow-sm group-hover:shadow-md transition-shadow bg-muted">
                 <img
                   src={getImageUrl(categoryImages[category.id])}
                   alt={category.name}
+                  loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
               </div>

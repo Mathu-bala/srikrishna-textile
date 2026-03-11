@@ -123,8 +123,8 @@ const MyOrders = () => {
                                     {order.items.slice(0, 4).map((item, index) => (
                                         <div key={index} className="w-16 h-20 rounded-lg overflow-hidden bg-muted">
                                             <img
-                                                src={getImageUrl(item.product.image)}
-                                                alt={item.product.name}
+                                                src={getImageUrl(item.product?.image || '')}
+                                                alt={item.product?.name || 'Unknown'}
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
@@ -142,10 +142,10 @@ const MyOrders = () => {
                                         <span className="font-semibold">₹{order.total.toLocaleString()}</span>
                                     </div>
                                     <div className="flex gap-3">
-                                        <Link to={`/track-order/${order.id}`}>
+                                        <Link to={`/orders/${order.id}`}>
                                             <Button variant="outline" size="sm">
                                                 <Eye size={16} className="mr-2" />
-                                                View Details
+                                                View Order
                                             </Button>
                                         </Link>
                                     </div>

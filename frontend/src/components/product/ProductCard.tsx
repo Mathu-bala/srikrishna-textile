@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, ShoppingCart, Star } from 'lucide-react';
+import { Heart, ShoppingCart, Star, Eye } from 'lucide-react';
 import { Product } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
@@ -47,119 +47,120 @@ const ProductCard = ({ product }: ProductCardProps) => {
     : 0;
 
   return (
-    <Link to={`/product/${product.id}`} className="group block">
-      <div className="glass-card overflow-hidden transition-all duration-300 hover:shadow-neon-purple hover:border-primary/50">
+    <Link to={`/product/${product.id}`} className="group block h-full">
+      <div className="glass-card overflow-hidden transition-all duration-300 hover:-translate-y-[6px] hover:shadow-xl hover:shadow-black/10 hover:border-primary/50 h-full flex flex-col p-[16px]">
         {/* Image */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-muted/30">
+        <div className="relative h-[220px] shrink-0 w-full overflow-hidden bg-muted/30 rounded-xl">
           <img
             src={getImageUrl(product.image)}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            loading="lazy"
+            className="w-full h-full object-cover lg:group-hover:scale-110 transition-transform duration-[400ms] ease-out"
           />
 
           {/* Overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
 
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <div className="absolute top-3 left-3 flex flex-col gap-2 z-20">
             {product.isNew && (
-              <span className="px-2 py-1 text-xs font-medium text-white bg-gradient-to-r from-neon-green to-secondary rounded-full shadow-neon-green">
+              <span className="px-2 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-neon-green to-secondary rounded-full shadow-neon-green animate-badge-pulse">
                 NEW
               </span>
             )}
             {discount > 0 && (
-              <span className="px-2 py-1 text-xs font-medium text-white bg-gradient-to-r from-accent to-primary rounded-full shadow-neon-pink">
+              <span className="px-2 py-1 text-[11px] font-bold text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-full shadow-md animate-badge-pulse">
                 {Math.abs(discount)}% OFF
               </span>
             )}
           </div>
 
-          {/* Wishlist Button */}
-          <button
-            className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300 backdrop-blur-sm ${inWishlist
-              ? 'bg-accent text-white shadow-neon-pink'
-              : 'bg-background/50 text-foreground hover:bg-accent/20 hover:text-accent border border-border/50'
-              }`}
-            onClick={handleWishlistToggle}
-          >
-            <Heart size={18} className={inWishlist ? 'fill-current' : ''} />
-          </button>
+          {/* Quick Actions Right Side */}
+          <div className="absolute top-3 right-3 flex flex-col gap-2 z-20 translate-x-0 lg:translate-x-12 opacity-100 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100 transition-all duration-300 ease-out">
+            {/* Wishlist */}
+            <button
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-transform hover:scale-110 shadow-sm backdrop-blur-sm ${inWishlist
+                ? 'bg-rose-50 text-rose-500'
+                : 'bg-white/90 text-foreground hover:text-rose-500'
+                }`}
+              onClick={handleWishlistToggle}
+            >
+              <Heart size={18} className={inWishlist ? 'fill-current' : ''} />
+            </button>
+            
+            {/* Quick View (Desktop Only) */}
+            <button
+              className="w-9 h-9 rounded-full items-center justify-center transition-transform hover:scale-110 shadow-sm backdrop-blur-sm bg-white/90 text-foreground hover:text-primary hidden lg:flex"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(`/product/${product.id}`);
+              }}
+            >
+              <Eye size={18} />
+            </button>
 
-          {/* Quick Add to Cart & Buy Now */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-10">
+            {/* Quick Add To Cart (Desktop Only) */}
+            <button
+              className="w-9 h-9 rounded-full items-center justify-center transition-transform hover:scale-110 shadow-sm backdrop-blur-sm bg-white/90 text-foreground hover:text-primary hidden lg:flex"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart size={18} />
+            </button>
+          </div>
+
+          {/* Removed absolute mobile bottom button per request to move to normal flow */}
+        </div>
+
+        {/* Details */}
+        <div className="p-4 flex flex-col flex-grow">
+          <p className="text-[10px] sm:text-xs text-secondary font-medium uppercase tracking-wider mb-1 line-clamp-1">
+            {product.fabric}
+          </p>
+          <h3 className="font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors duration-300" title={product.name}>
+            {product.name}
+          </h3>
+
+          {/* Rating */}
+          <div className="flex items-center gap-1 mt-auto pt-2">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                size={14}
+                className={i < Math.floor(product.rating || 4) ? 'text-[#FACC15] fill-[#FACC15]' : 'text-muted-foreground/30'}
+              />
+            ))}
+            <span className="text-xs text-muted-foreground ml-1">({product.reviews || Math.floor(Math.random() * 500 + 50)} reviews)</span>
+          </div>
+
+          {/* Price */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
+            <span className="font-display font-bold text-base sm:text-lg text-foreground">
+              ₹{product.price.toLocaleString()}
+            </span>
+            {product.originalPrice && (
+              <span className="text-[11px] sm:text-sm text-muted-foreground line-through">
+                ₹{product.originalPrice.toLocaleString()}
+              </span>
+            )}
+          </div>
+
+          {/* Mobile/Tablet Add to Cart */}
+          <div className="mt-3 lg:hidden">
             {(!product.inStock || product.stock < 1) ? (
               <button
-                className="w-full bg-muted/90 backdrop-blur-sm text-muted-foreground py-2 rounded-full flex items-center justify-center gap-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-[36px] sm:h-[40px] px-[12px] py-[8px] sm:px-[16px] sm:py-[10px] bg-muted/90 text-muted-foreground rounded-[8px] flex items-center justify-center gap-2 text-[14px] sm:text-[15px] font-medium disabled:opacity-50"
                 disabled
               >
                 Out of Stock
               </button>
             ) : (
-              <div className="flex flex-col gap-3">
-                {/* Add to Cart - Primary to Purple Gradient */}
-                <button
-                  className="w-full relative overflow-hidden bg-gradient-to-r from-primary to-purple-600 text-white py-2 rounded-full flex items-center justify-center gap-2 text-sm font-bold shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 transition-all duration-300 active:scale-95 group/btn border border-white/10"
-                  onClick={handleAddToCart}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent translate-x-[-100%] group-hover/btn:animate-shimmer" />
-                  <ShoppingCart size={16} className="fill-current text-white" />
-                  Add to Cart
-                </button>
-
-                {/* Buy Now - Accent to Emerald Gradient */}
-                <button
-                  className="w-full relative overflow-hidden bg-gradient-to-r from-accent to-emerald-500 text-white py-2 rounded-full flex items-center justify-center gap-2 text-sm font-bold shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/50 transition-all duration-300 active:scale-95 group/btn border border-white/10"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const buyNowItem = {
-                      ...product,
-                      quantity: 1,
-                      selectedSize: product.sizes?.[0],
-                      selectedColor: product.colors?.[0]
-                    };
-                    sessionStorage.setItem('buyNowProduct', JSON.stringify(buyNowItem));
-                    window.location.href = '/buy-now-checkout';
-                  }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent translate-x-[-100%] group-hover/btn:animate-shimmer" />
-                  Buy Now
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Details */}
-        <div className="p-4">
-          <p className="text-xs text-secondary font-medium uppercase tracking-wider mb-1">
-            {product.fabric}
-          </p>
-          <h3 className="font-medium text-foreground line-clamp-2 group-hover:text-secondary transition-colors">
-            {product.name}
-          </h3>
-
-          {/* Rating */}
-          <div className="flex items-center gap-1 mt-2">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                size={12}
-                className={i < Math.floor(product.rating) ? 'text-secondary fill-secondary' : 'text-muted-foreground'}
-              />
-            ))}
-            <span className="text-xs text-muted-foreground ml-1">({product.rating})</span>
-          </div>
-
-          {/* Price */}
-          <div className="flex items-center gap-2 mt-2">
-            <span className="font-display font-bold text-lg text-foreground">
-              ₹{product.price.toLocaleString()}
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
-                ₹{product.originalPrice.toLocaleString()}
-              </span>
+              <button
+                className="w-full h-[36px] sm:h-[40px] px-[12px] py-[8px] sm:px-[16px] sm:py-[10px] bg-primary text-white rounded-[8px] flex items-center justify-center gap-2 text-[14px] sm:text-[15px] font-bold shadow-md active:scale-95"
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart className="w-[16px] h-[16px]" />
+                Add to Cart
+              </button>
             )}
           </div>
         </div>

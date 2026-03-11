@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
     Search, Package, User, Mail, Calendar,
     CreditCard, Truck, CheckCircle,
-    Eye, Edit3, ArrowUpDown, Filter, X
+    Eye, Edit3, ArrowUpDown, Filter, X, Download, FileText
 } from 'lucide-react';
 import { getAdminOrders, updateAdminOrderStatus } from '@/services/api';
 import { Button } from '@/components/ui/button';
@@ -46,16 +46,15 @@ interface OrderData {
     total: number;
     status: string;
     createdAt: string;
+    paymentId?: string;
+    paymentMethod?: string;
+    isPaid?: boolean;
     // Mapped for UI
-    paymentMethod: string;
     totalAmount: number;
     customerName: string;
     email: string;
     deliveryAddress: {
         address: string;
-        city: string;
-        postalCode: string;
-        country: string;
     };
 }
 
@@ -82,12 +81,11 @@ const OrdersManagement = () => {
                 totalAmount: order.total,
                 customerName: order.user?.name || 'Unknown',
                 email: order.user?.email || 'No Email',
-                paymentMethod: 'Cash on Delivery',
+                paymentMethod: order.paymentMethod || (order.isPaid ? 'Razorpay' : 'COD'),
+                isPaid: order.isPaid || false,
+                paymentId: order.paymentId || '',
                 deliveryAddress: {
                     address: order.shippingAddress || 'No Address',
-                    city: '',
-                    postalCode: '',
-                    country: ''
                 },
                 items: order.items.map((item: any) => ({
                     ...item,
@@ -146,6 +144,91 @@ const OrdersManagement = () => {
     const openOrderDetail = (order: OrderData) => {
         setSelectedOrder(order);
         setIsModalOpen(true);
+    };
+
+    // ─── Invoice PDF Download ──────────────────────────────────────────────
+    const downloadInvoice = (order: OrderData) => {
+        const win = window.open('', '_blank');
+        if (!win) return;
+        const dateStr = new Date(order.createdAt).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'long', year: 'numeric'
+        });
+        const itemRows = order.items.map((item: any) => `
+            <tr>
+                <td>${item.productName || item.product?.name || 'Product'}</td>
+                <td>Qty: ${item.quantity}</td>
+                <td style="text-align:right;">₹${(item.price || 0).toLocaleString()}</td>
+                <td style="text-align:right;">₹${((item.price || 0) * item.quantity).toLocaleString()}</td>
+            </tr>
+        `).join('');
+
+        const html = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Invoice #${order.id}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; color: #111; padding: 40px; font-size: 13px; }
+    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #7c3aed; padding-bottom: 20px; margin-bottom: 20px; }
+    .brand h1 { font-size: 22px; color: #7c3aed; } .brand p { color: #666; font-size: 11px; }
+    .invoice-meta { text-align: right; } .invoice-meta h2 { font-size: 18px; color: #333; }
+    .invoice-meta span { font-size: 12px; color: #666; }
+    .section { margin: 16px 0; }
+    .section h3 { font-size: 12px; text-transform: uppercase; color: #7c3aed; margin-bottom: 6px; letter-spacing: 0.5px; }
+    .section p { font-size: 13px; line-height: 1.5; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    thead tr { background: #7c3aed; color: white; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 13px; }
+    tfoot tr { background: #f9f9f9; font-weight: bold; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: bold; }
+    .paid { background: #d1fae5; color: #065f46; } .unpaid { background: #fef3c7; color: #92400e; }
+    .footer { text-align: center; margin-top: 40px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 12px; }
+    @media print { body { padding: 20px; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">
+      <h1>SriKrishna Textile Shop</h1>
+      <p>Premium Textiles & Sarees</p>
+    </div>
+    <div class="invoice-meta">
+      <h2>INVOICE</h2>
+      <span>#${order.id}</span><br/>
+      <span>Date: ${dateStr}</span>
+    </div>
+  </div>
+  <div class="section">
+    <h3>Customer</h3>
+    <p><strong>${order.customerName}</strong><br/>${order.email}</p>
+  </div>
+  <div class="section">
+    <h3>Delivery Address</h3>
+    <p>${order.deliveryAddress?.address || order.shippingAddress || ''}</p>
+  </div>
+  <table>
+    <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead>
+    <tbody>${itemRows}</tbody>
+    <tfoot>
+      <tr><td colspan="3">Total</td><td style="text-align:right;">₹${(order.totalAmount || order.total).toLocaleString()}</td></tr>
+    </tfoot>
+  </table>
+  <div class="section" style="margin-top:20px;">
+    <h3>Payment</h3>
+    <p>
+      Method: ${order.paymentMethod || 'N/A'} &nbsp;
+      <span class="badge ${order.isPaid ? 'paid' : 'unpaid'}">${order.isPaid ? '✅ Paid' : '⏳ Pending'}</span>
+    </p>
+    ${order.paymentId ? `<p style="font-size:11px;color:#666;margin-top:4px;">Payment ID: ${order.paymentId}</p>` : ''}
+  </div>
+  <div class="footer">Thank you for shopping with SriKrishna Textile Shop! For support: support@srikrishnatextile.com</div>
+  <script>window.onload = () => { window.print(); }</script>
+</body>
+</html>`;
+
+        win.document.write(html);
+        win.document.close();
+        toast.success('Invoice opened — use Ctrl+P or Print to save as PDF');
     };
 
     const getStatusBadge = (status: string) => {
@@ -275,8 +358,17 @@ const OrdersManagement = () => {
                                                         <SelectItem value="cancelled">Cancelled</SelectItem>
                                                     </SelectContent>
                                                 </Select>
+                                                <Button
+                                                    variant="ghost" size="sm"
+                                                    className="hover:bg-neon-green/10 hover:text-neon-green"
+                                                    onClick={() => downloadInvoice(order)}
+                                                    title="Download Invoice"
+                                                >
+                                                    <Download size={16} />
+                                                </Button>
                                             </div>
                                         </td>
+
                                     </tr>
                                 ))
                             )}
@@ -295,6 +387,14 @@ const OrdersManagement = () => {
                             </div>
                             <div className="flex flex-col items-end gap-2">
                                 {selectedOrder && getStatusBadge(selectedOrder.status)}
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-xs border-neon-green/30 text-neon-green hover:bg-neon-green/10"
+                                    onClick={() => selectedOrder && downloadInvoice(selectedOrder)}
+                                >
+                                    <Download size={13} className="mr-1" /> Download Invoice
+                                </Button>
                             </div>
                         </div>
                     </DialogHeader>
@@ -352,9 +452,22 @@ const OrdersManagement = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
                                     <h4 className="text-xs font-bold uppercase text-muted-foreground">Payment Method</h4>
-                                    <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg border border-border/30">
-                                        <CreditCard size={18} className="text-primary" />
-                                        <span className="font-medium text-sm">{selectedOrder.paymentMethod}</span>
+                                    <div className="glass-card p-4 bg-muted/20">
+                                        <h4 className="text-xs font-bold uppercase text-muted-foreground mb-4 flex items-center gap-2"><CreditCard size={14} /> Payment
+                                        </h4>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium">{selectedOrder.paymentMethod || 'N/A'}</span>
+                                                {selectedOrder.isPaid ? (
+                                                    <span className="text-[10px] font-bold bg-neon-green/20 text-neon-green px-2 py-0.5 rounded-full">✅ PAID</span>
+                                                ) : (
+                                                    <span className="text-[10px] font-bold bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full">⏳ UNPAID</span>
+                                                )}
+                                            </div>
+                                            {selectedOrder.paymentId && (
+                                                <p className="text-[11px] text-muted-foreground font-mono break-all">ID: {selectedOrder.paymentId}</p>
+                                            )}
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2 pt-2">

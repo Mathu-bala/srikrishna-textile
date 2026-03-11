@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Package, AlertTriangle, Plus, Minus, Search, Edit, Save, Trash2,
   LayoutDashboard, ShoppingBag, Archive, ClipboardList, Users, LogOut, Zap,
-  IndianRupee, CheckCircle
+  IndianRupee, CheckCircle, Settings, ToggleLeft, ToggleRight
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -15,6 +15,7 @@ import UsersManagement from '@/components/admin/UsersManagement';
 import OrdersManagement from '@/components/admin/OrdersManagement';
 import InventoryManagement from '@/components/admin/InventoryManagement';
 import ProductModal from '@/components/admin/ProductModal';
+import { isConfigured as firebaseConfigured } from '@/lib/firebase';
 
 import { getImageUrl } from '@/lib/imageUtils';
 
@@ -38,6 +39,10 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductStock | null>(null);
+  const [socialSettings, setSocialSettings] = useState({
+    googleLogin: false,
+    facebookLogin: false,
+  });
 
   // Initialize data
   const loadDashboardData = async () => {
@@ -178,6 +183,7 @@ const AdminDashboard = () => {
     { id: 'inventory', label: 'Inventory', icon: Archive },
     { id: 'orders', label: 'Orders', icon: ClipboardList },
     { id: 'users', label: 'Users', icon: Users },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   const renderTabContent = () => {
@@ -188,19 +194,116 @@ const AdminDashboard = () => {
         return <OrdersManagement />;
       case 'inventory':
         return <InventoryManagement />;
+      case 'settings':
+        return (
+          <>
+            <div className="mb-8">
+              <h1 className="font-display text-3xl font-bold">
+                Admin <span className="text-gradient-neon">Settings</span>
+              </h1>
+              <p className="text-muted-foreground">Configure optional site features</p>
+            </div>
+
+            {/* Social Login Toggles */}
+            <div className="glass-card p-6 max-w-lg">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                  <Settings size={18} className="text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-semibold">Social Login</h2>
+                  <p className="text-xs text-muted-foreground">Enable OAuth login options on the login page</p>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-4 border-t border-border/50 pt-5">
+                {/* Google Toggle */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.2H42V20H24v8h11.3C33.7 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.3 6.5 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.8z" /><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19.1 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.3 6.5 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" /><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.3 0-9.7-2.9-11.3-7H5.8C9.1 38.8 16 44 24 44z" /><path fill="#1976D2" d="M43.6 20.2H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.5l6.2 5.2C40.2 35.8 44 30.4 44 24c0-1.3-.1-2.6-.4-3.8z" /></svg>
+                    <div>
+                      <div className="text-sm font-medium">Enable Google Login</div>
+                      <div className="text-[11px] text-muted-foreground">Requires Firebase Google OAuth setup</div>
+                    </div>
+                  </div>
+                  <button
+                    id="admin-toggle-google"
+                    onClick={() => setSocialSettings(s => ({ ...s, googleLogin: !s.googleLogin }))}
+                    className="transition-colors"
+                    aria-label="Toggle Google Login"
+                  >
+                    {socialSettings.googleLogin
+                      ? <ToggleRight size={32} className="text-primary" />
+                      : <ToggleLeft size={32} className="text-muted-foreground" />}
+                  </button>
+                </div>
+
+                {/* Facebook Toggle */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#1877F2" d="M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24c0 12 8.8 21.9 20.3 23.7V30.9h-6.1V24h6.1v-5.3c0-6 3.6-9.4 9.1-9.4 2.6 0 5.4.5 5.4.5v5.9H31c-3 0-3.9 1.9-3.9 3.7V24h6.7l-1.1 6.9h-5.6v16.8C39.2 45.9 48 36 48 24z" /><path fill="#fff" d="M33.4 30.9l1.1-6.9h-6.7v-4.5c0-1.9.9-3.7 3.9-3.7h3.1v-5.9s-2.8-.5-5.4-.5c-5.5 0-9.1 3.3-9.1 9.4V24h-6.1v6.9h6.1v16.8c1.2.2 2.5.3 3.7.3s2.5-.1 3.7-.3V30.9h5.7z" /></svg>
+                    <div>
+                      <div className="text-sm font-medium">Enable Facebook Login</div>
+                      <div className="text-[11px] text-muted-foreground">Requires Firebase Facebook OAuth setup</div>
+                    </div>
+                  </div>
+                  <button
+                    id="admin-toggle-facebook"
+                    onClick={() => setSocialSettings(s => ({ ...s, facebookLogin: !s.facebookLogin }))}
+                    className="transition-colors"
+                    aria-label="Toggle Facebook Login"
+                  >
+                    {socialSettings.facebookLogin
+                      ? <ToggleRight size={32} className="text-primary" />
+                      : <ToggleLeft size={32} className="text-muted-foreground" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Firebase Status Indicator */}
+              <div className={`mt-5 p-4 rounded-lg border ${firebaseConfigured
+                  ? 'bg-neon-green/5 border-neon-green/30'
+                  : 'bg-destructive/5 border-destructive/30'
+                }`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-sm font-semibold ${firebaseConfigured ? 'text-neon-green' : 'text-destructive'
+                    }`}>
+                    {firebaseConfigured ? '✅ Firebase Connected' : '❌ Firebase Not Configured'}
+                  </span>
+                </div>
+                {!firebaseConfigured && (
+                  <ol className="text-[11px] text-muted-foreground space-y-1 list-decimal list-inside leading-relaxed">
+                    <li>Go to <span className="text-primary font-medium">console.firebase.google.com</span></li>
+                    <li>Create / open your project → Project Settings → Web App</li>
+                    <li>Copy the config values into <code className="text-primary">frontend/.env</code></li>
+                    <li>Enable Google &amp; Facebook in Authentication → Sign-in method</li>
+                    <li>Add <code className="text-primary">localhost</code> to Authorised Domains</li>
+                    <li className="font-semibold text-foreground/70">Restart the dev server (Ctrl+C → npm run dev)</li>
+                  </ol>
+                )}
+                {firebaseConfigured && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Google &amp; Facebook login buttons are active on the login page.
+                  </p>
+                )}
+              </div>
+            </div>
+          </>
+        );
       case 'dashboard':
       case 'products':
       default:
         return (
           <>
-            <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
+            {/* Dashboard header — stacks vertically on mobile */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-8">
               <div>
-                <h1 className="font-display text-3xl font-bold">
+                <h1 className="font-display text-2xl sm:text-3xl font-bold">
                   {activeTab === 'products' ? 'Product' : 'Admin'} <span className="text-gradient-neon">{activeTab === 'products' ? 'Management' : 'Dashboard'}</span>
                 </h1>
-                <p className="text-muted-foreground">Welcome back, {user?.name}</p>
+                <p className="text-muted-foreground text-sm">Welcome back, {user?.name}</p>
               </div>
-              <Button onClick={openAddModal} className="btn-neon">
+              <Button onClick={openAddModal} className="btn-neon w-full sm:w-auto">
                 <Plus size={18} className="mr-2" />
                 Add New Product
               </Button>
@@ -222,7 +325,7 @@ const AdminDashboard = () => {
             )}
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
               {/* Total Products */}
               <div className="glass-card p-4 hover:shadow-neon-purple transition-all">
@@ -276,15 +379,15 @@ const AdminDashboard = () => {
 
             </div>
 
-            {/* Search */}
-            <div className="relative max-w-md mb-6">
+            {/* Search — full width on mobile */}
+            <div className="relative w-full max-w-md mb-6">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
               <Input
                 type="text"
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-muted/50 border-border/50"
+                className="pl-10 bg-muted/50 border-border/50 w-full"
               />
             </div>
 
@@ -401,7 +504,7 @@ const AdminDashboard = () => {
               onClose={() => setIsProductModalOpen(false)}
               product={selectedProduct}
               onSuccess={() => {
-                loadInventory();
+                loadDashboardData();
                 setIsProductModalOpen(false);
               }}
             />
@@ -413,10 +516,11 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow bg-background">
-        <div className="flex">
-          {/* Sidebar */}
-          <div className="w-64 min-h-[calc(100vh-140px)] bg-card/50 backdrop-blur-xl border-r border-border/50 p-4 hidden lg:block">
+      <main className="flex-grow bg-background overflow-x-hidden">
+        <div className="flex flex-col lg:flex-row">
+
+          {/* ── Sidebar (desktop only) ── */}
+          <div className="w-64 min-h-[calc(100vh-140px)] bg-card/50 backdrop-blur-xl border-r border-border/50 p-4 hidden lg:flex lg:flex-col">
             <div className="mb-8">
               <h2 className="font-display text-lg font-bold text-gradient-neon">Admin Panel</h2>
               <p className="text-xs text-muted-foreground">Manage your store</p>
@@ -427,10 +531,11 @@ const AdminDashboard = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === item.id
-                    ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-secondary border border-secondary/30'
-                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                    }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                    activeTab === item.id
+                      ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-secondary border border-secondary/30'
+                      : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  }`}
                 >
                   <item.icon size={18} />
                   {item.label}
@@ -449,8 +554,35 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-grow p-6">
+          {/* ── Mobile tab bar (visible below lg) ── */}
+          <div className="lg:hidden bg-card/80 backdrop-blur border-b border-border/50 sticky top-0 z-30">
+            <div className="flex overflow-x-auto scrollbar-hide px-2 py-1 gap-1">
+              {sidebarItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition-all shrink-0 ${
+                    activeTab === item.id
+                      ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-secondary border border-secondary/30'
+                      : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  }`}
+                >
+                  <item.icon size={15} />
+                  {item.label}
+                </button>
+              ))}
+              <button
+                onClick={() => { logout(); navigate('/login'); }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg whitespace-nowrap text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+              >
+                <LogOut size={15} />
+                Logout
+              </button>
+            </div>
+          </div>
+
+          {/* ── Main Content ── */}
+          <div className="flex-grow p-4 sm:p-6 max-w-full overflow-x-hidden">
             {renderTabContent()}
           </div>
         </div>

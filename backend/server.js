@@ -10,6 +10,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+
+// Stripe webhook needs raw body, parse it before JSON
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 
 // Connect to MongoDB
@@ -33,6 +36,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/support', require('./routes/supportRoutes'));
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
+app.use('/api/stripe', require('./routes/stripeRoutes'));
+app.use('/api/payment', require('./routes/paymentRoutes'));
 
 // Search suggestions endpoint
 app.get('/api/search', async (req, res) => {
@@ -60,4 +65,5 @@ app.get('/api/search', async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    // Trigger nodemon restart
 });

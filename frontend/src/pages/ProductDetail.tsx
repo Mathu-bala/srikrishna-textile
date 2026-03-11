@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Minus, Plus, Star, Truck, RefreshCw, Shield, Loader2, Zap } from 'lucide-react';
+import { ArrowLeft, Heart, Minus, Plus, Star, Truck, RefreshCw, Shield, Loader2, Zap, ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,48 @@ const ProductDetail = () => {
   // Check if product is in wishlist
   const inWishlist = product ? isInWishlist(product.id) : false;
 
+  const allImages = useMemo(() => product ? Array.from(new Set([product.image, ...(product.images || [])])) : [], [product]);
+  const [imagesByColor, setImagesByColor] = useState<string[]>([]);
+  const [activeImage, setActiveImage] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [thumbnailStartIndex, setThumbnailStartIndex] = useState(0);
+
+  const displayCount = 5;
+
+  useEffect(() => {
+    if (product) {
+      let imagesToShow = allImages;
+      if (selectedColor) {
+        const colorLower = selectedColor.toLowerCase();
+        const matches = allImages.filter(img => img.toLowerCase().includes(colorLower));
+        if (matches.length > 0) {
+          imagesToShow = matches;
+        }
+      }
+      setImagesByColor(imagesToShow);
+      setActiveImage(0);
+      setThumbnailStartIndex(0);
+    }
+  }, [selectedColor, allImages, product]);
+
+  const handlePrevImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setActiveImage((prev) => (prev === 0 ? imagesByColor.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setActiveImage((prev) => (prev === imagesByColor.length - 1 ? 0 : prev + 1));
+  };
+  
+  const handleThumbnailPrev = () => {
+    setThumbnailStartIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleThumbnailNext = () => {
+    setThumbnailStartIndex((prev) => Math.min(imagesByColor.length - displayCount, prev + 1));
+  };
+
   const loadProductData = async () => {
     if (!id) return;
     setLoading(true);
@@ -42,6 +84,9 @@ const ProductDetail = () => {
       setProduct(productData);
       setSelectedSize(productData.sizes?.[0] || '');
       setSelectedColor(productData.colors?.[0] || '');
+      
+      setActiveImage(0);
+      setThumbnailStartIndex(0);
 
       // Fetch related products
       const related = await fetchProducts({ category: productData.category });
@@ -128,7 +173,7 @@ const ProductDetail = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow bg-background">
-        <div className="container-custom py-8">
+        <div className="container-custom py-12">
           {/* Breadcrumb */}
           <Link
             to="/products"
@@ -139,25 +184,95 @@ const ProductDetail = () => {
           </Link>
 
           <div className="grid lg:grid-cols-2 gap-12">
-            {/* Product Image */}
-            <div className="space-y-4">
-              <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
+            {/* Product Image Section */}
+            <div className="space-y-6">
+              <div 
+                className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted cursor-pointer group shadow-lg"
+                onClick={() => setIsLightboxOpen(true)}
+              >
                 <img
-                  src={getImageUrl(product.image)}
+                  key={imagesByColor[activeImage] || product.image}
+                  src={getImageUrl(imagesByColor[activeImage] || product.image)}
                   alt={product.name}
-                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 animate-in fade-in duration-500"
                 />
+                
+                {/* Overlay on hover */}
+                <div className="absolute inset-0 bg-background/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[1px]">
+                  <Maximize2 size={36} className="text-neon-cyan drop-shadow-md glow" />
+                </div>
+                
                 {discount !== 0 && (
-                  <span className="absolute top-4 left-4 bg-gold text-charcoal text-sm font-medium px-3 py-1 rounded">
+                  <span className="absolute top-4 left-4 bg-gradient-to-r from-accent to-primary text-white text-sm font-medium px-3 py-1 rounded shadow-neon-pink z-10">
                     {Math.abs(discount)}% OFF
                   </span>
                 )}
                 {product.isNew && (
-                  <span className="absolute top-4 right-4 bg-primary text-primary-foreground text-sm font-medium px-3 py-1 rounded">
+                  <span className="absolute top-4 right-4 bg-gradient-to-r from-neon-green to-secondary text-white text-sm font-medium px-3 py-1 rounded shadow-neon-green z-10">
                     NEW
                   </span>
                 )}
               </div>
+              
+              <div className="text-center">
+                <button 
+                  onClick={() => setIsLightboxOpen(true)}
+                  className="text-sm text-neon-cyan hover:text-white transition-colors duration-300 underline underline-offset-4 decoration-neon-cyan/50 hover:decoration-white"
+                >
+                  Click to see full view
+                </button>
+              </div>
+
+              {/* Thumbnails Row */}
+              {imagesByColor.length > 1 && (
+                <div className="relative flex items-center justify-center gap-2 max-w-full px-6">
+                  {imagesByColor.length > displayCount && (
+                    <button 
+                      onClick={handleThumbnailPrev} 
+                      disabled={thumbnailStartIndex === 0}
+                      className="absolute left-0 z-10 w-8 h-8 flex items-center justify-center bg-background/60 backdrop-blur-md rounded-full border border-border shadow-lg disabled:opacity-30 disabled:cursor-not-allowed hover:text-neon-cyan hover:border-neon-cyan hover:shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+                  )}
+                  
+                  <div className="flex gap-3 overflow-x-auto scrollbar-hide py-2 px-1 snap-x flex-nowrap w-full">
+                    {imagesByColor.slice(thumbnailStartIndex, thumbnailStartIndex + displayCount).map((img, index) => {
+                       const actualIndex = thumbnailStartIndex + index;
+                       const isActive = activeImage === actualIndex;
+                       return (
+                         <div 
+                           key={actualIndex}
+                           onClick={() => setActiveImage(actualIndex)}
+                           className={`relative flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 snap-center glass-card
+                             ${isActive 
+                               ? 'ring-2 ring-neon-cyan border-none scale-105 shadow-[0_0_15px_rgba(34,211,238,0.5)]' 
+                               : 'border border-border/50 hover:border-neon-cyan/80 hover:scale-105 opacity-70 hover:opacity-100'}
+                           `}
+                         >
+                           <img 
+                             src={getImageUrl(img)} 
+                             alt={`${product.name} thumbnail ${actualIndex + 1}`}
+                             loading="lazy"
+                             className="w-full h-full object-cover"
+                           />
+                         </div>
+                       );
+                    })}
+                  </div>
+
+                  {imagesByColor.length > displayCount && (
+                    <button 
+                      onClick={handleThumbnailNext}
+                      disabled={thumbnailStartIndex >= imagesByColor.length - displayCount}
+                      className="absolute right-0 z-10 w-8 h-8 flex items-center justify-center bg-background/60 backdrop-blur-md rounded-full border border-border shadow-lg disabled:opacity-30 disabled:cursor-not-allowed hover:text-neon-cyan hover:border-neon-cyan hover:shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Product Details */}
@@ -201,6 +316,55 @@ const ProductDetail = () => {
                 )}
               </div>
 
+              {/* Color Selection - Moving Up per prompt */}
+              {product.colors && product.colors.length > 0 && (
+              <div className="mb-6">
+                <label className="block font-medium mb-3">Color:</label>
+                <div className="flex flex-wrap gap-4 items-center">
+                  {product.colors.map((color) => {
+                    const isActive = selectedColor === color;
+                    
+                    // Basic heuristic color map for CSS circular dots
+                    const cssColorMap: Record<string, string> = {
+                      'red': '#ef4444',
+                      'blue': '#3b82f6',
+                      'black': '#000000',
+                      'green': '#22c55e',
+                      'pink': '#ec4899',
+                      'white': '#ffffff',
+                      'purple': '#a855f7',
+                      'yellow': '#eab308',
+                      'cyan': '#22d3ee'
+                    };
+                    const mappedColor = cssColorMap[color.toLowerCase()] || color.toLowerCase();
+
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => setSelectedColor(color)}
+                        className={`group relative flex items-center gap-2 transition-all duration-300 rounded-full pr-3 pb-1 pt-1 ${
+                          isActive 
+                            ? 'scale-105' 
+                            : 'hover:scale-105 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <div 
+                           className={`w-6 h-6 rounded-full border border-border/50 shadow-sm transition-all duration-300
+                            ${isActive ? 'ring-2 ring-neon-cyan ring-offset-2 ring-offset-background shadow-[0_0_10px_rgba(34,211,238,0.5)]' : 'group-hover:ring-1 group-hover:ring-border group-hover:ring-offset-1 group-hover:ring-offset-background'}
+                           `}
+                           style={{ backgroundColor: mappedColor }}
+                           title={color}
+                        />
+                        <span className={`text-sm ${isActive ? 'text-neon-cyan font-semibold drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] glow' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                          {color}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              )}
+
               {/* Description */}
               <p className="text-muted-foreground mb-8">{product.description}</p>
 
@@ -223,24 +387,7 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* Color Selection */}
-              <div className="mb-6">
-                <label className="block font-medium mb-3">Color</label>
-                <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 border rounded-lg transition-colors ${selectedColor === color
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'border-border hover:border-primary'
-                        }`}
-                    >
-                      {color}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {/* Original Color Selection removed -> Moved Above */}
 
               {/* Quantity */}
               <div className="mb-8">
@@ -263,31 +410,31 @@ const ProductDetail = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-4 mb-8">
+              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                  <Button
+                    className="h-[36px] px-[12px] py-[8px] text-[14px] rounded-[8px] sm:h-[40px] sm:px-[16px] sm:py-[10px] sm:text-[15px] lg:h-auto lg:min-h-[44px] lg:px-8 lg:py-6 lg:text-lg lg:rounded-md flex-1 bg-primary hover:bg-primary/90 text-primary-foreground transition-all"
+                    onClick={handleAddToCart}
+                    disabled={!product.inStock || product.stock < 1}
+                  >
+                    {(!product.inStock || product.stock < 1) ? 'Out of Stock' : 'Add to Cart'}
+                  </Button>
+                  <Button
+                    className="h-[36px] px-[12px] py-[8px] text-[14px] rounded-[8px] sm:h-[40px] sm:px-[16px] sm:py-[10px] sm:text-[15px] lg:h-auto lg:min-h-[44px] lg:px-8 lg:py-6 lg:text-lg lg:rounded-md flex-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground btn-neon transition-all"
+                    onClick={handleBuyNow}
+                    disabled={!product.inStock || product.stock < 1}
+                  >
+                    <Zap className="mr-1 sm:mr-2 w-[16px] h-[16px] sm:w-[18px] sm:h-[18px] lg:w-5 lg:h-5" />
+                    Buy Now
+                  </Button>
+                </div>
                 <Button
-                  size="lg"
-                  className="flex-1 bg-primary hover:bg-maroon-dark text-primary-foreground"
-                  onClick={handleAddToCart}
-                  disabled={!product.inStock || product.stock < 1}
-                >
-                  {(!product.inStock || product.stock < 1) ? 'Out of Stock' : 'Add to Cart'}
-                </Button>
-                <Button
-                  size="lg"
-                  className="flex-1 bg-secondary hover:bg-secondary/80 text-secondary-foreground btn-neon"
-                  onClick={handleBuyNow}
-                  disabled={!product.inStock || product.stock < 1}
-                >
-                  <Zap className="mr-2 h-5 w-5" />
-                  Buy Now
-                </Button>
-                <Button
-                  size="lg"
                   variant="outline"
-                  className={`px-4 border-primary/50 hover:bg-primary/10 transition-colors ${inWishlist ? 'border-accent text-accent' : ''}`}
+                  className={`h-[36px] px-[12px] py-[8px] text-[14px] rounded-[8px] sm:h-[40px] sm:px-[16px] sm:py-[10px] sm:text-[15px] lg:h-auto lg:min-h-[44px] lg:px-8 lg:text-lg lg:rounded-md border-primary/50 hover:bg-primary/10 transition-colors w-full sm:w-auto ${inWishlist ? 'border-accent text-accent' : ''}`}
                   onClick={handleWishlistToggle}
                 >
-                  <Heart size={20} className={inWishlist ? 'fill-accent text-accent' : 'text-foreground'} />
+                  <Heart className={`w-[16px] h-[16px] sm:w-[18px] sm:h-[18px] lg:w-[20px] lg:h-[20px] ${inWishlist ? 'fill-accent text-accent' : 'text-foreground'}`} />
+                  <span className="ml-2 sm:hidden">Wishlist</span>
                 </Button>
               </div>
 
@@ -322,7 +469,7 @@ const ProductDetail = () => {
           {relatedProducts.length > 0 && (
             <div className="mt-16">
               <h2 className="font-serif text-2xl font-semibold mb-8">You May Also Like</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {relatedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -331,6 +478,54 @@ const ProductDetail = () => {
           )}
         </div>
       </main>
+
+      {/* Lightbox Modal */}
+      {isLightboxOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setIsLightboxOpen(false)}>
+          {/* Close Button */}
+          <button 
+            onClick={() => setIsLightboxOpen(false)}
+            className="absolute top-6 right-6 p-2 text-muted-foreground hover:text-neon-cyan bg-muted/40 hover:bg-muted/80 rounded-full transition-all duration-300 z-50 backdrop-blur-sm shadow-lg"
+          >
+            <X size={24} />
+          </button>
+          
+          {/* Image Counter */}
+          <div className="absolute top-6 left-6 px-4 py-2 text-foreground bg-muted/40 rounded-full text-sm font-medium tracking-wider backdrop-blur-sm border border-border/50 shadow-lg">
+            {activeImage + 1} / {imagesByColor.length}
+          </div>
+
+          {/* Previous Arrow */}
+          {imagesByColor.length > 1 && (
+            <button 
+              onClick={handlePrevImage}
+              className="absolute left-4 md:left-12 p-3 text-muted-foreground hover:text-neon-cyan bg-muted/40 hover:bg-muted/80 rounded-full transition-all duration-300 z-50 backdrop-blur-sm group shadow-lg"
+            >
+              <ChevronLeft size={32} className="group-hover:-translate-x-1 transition-transform" />
+            </button>
+          )}
+
+          {/* Main Lightbox Image */}
+          <div className="relative max-w-5xl max-h-[85vh] w-full h-full p-4 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <img 
+              src={getImageUrl(imagesByColor[activeImage] || product.image)} 
+              alt={`${product.name} full view`}
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300 border border-border/20"
+            />
+          </div>
+
+          {/* Next Arrow */}
+          {imagesByColor.length > 1 && (
+            <button 
+              onClick={handleNextImage}
+              className="absolute right-4 md:right-12 p-3 text-muted-foreground hover:text-neon-cyan bg-muted/40 hover:bg-muted/80 rounded-full transition-all duration-300 z-50 backdrop-blur-sm group shadow-lg"
+            >
+              <ChevronRight size={32} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          )}
+        </div>
+      )}
+
       <Footer />
     </div>
   );

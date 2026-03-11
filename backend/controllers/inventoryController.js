@@ -1,254 +1,203 @@
 const Inventory = require('../models/Inventory');
 const Product = require('../models/Product');
-const asyncHandler = require('express-async-handler');
 
-// @desc    Get all inventory items
+// @desc    Add New Stock
+// @route   POST /api/inventory/add
+// @access  Private/Admin
+const addInventory = async (req, res) => {
+    try {
+        const { productId, sku, variant, stockLevel, price } = req.body;
+
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        const skuExists = await Inventory.findOne({ sku });
+        if (skuExists) {
+            return res.status(400).json({ message: 'Inventory item with this SKU already exists' });
+        }
+
+        const inventoryItem = new Inventory({
+            productId: product._id,
+            productName: product.name,
+            sku,
+            variant: variant || 'Standard',
+            stockLevel: Number(stockLevel),
+            price: Number(price)
+        });
+
+        await inventoryItem.save();
+        res.status(201).json(inventoryItem);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Get All Inventory (with pagination)
 // @route   GET /api/inventory
 // @access  Private/Admin
-const getInventory = asyncHandler(async (req, res) => {
-    const pageSize = 20;
-    const page = Number(req.query.pageNumber) || 1;
-    const keyword = req.query.keyword
-        ? {
-            $or: [
-                { sku: { $regex: req.query.keyword, $options: 'i' } },
-                // Populated fields usually can't be searched simply with top-level regex in one go 
-                // without aggregation, but let's stick to SKU for basic search or do client-side filter
-            ],
+const getInventory = async (req, res) => {
+    try {
+        const pageSize = 10;
+        const page = Number(req.query.pageNumber) || 1;
+
+        const count = await Inventory.countDocuments({});
+        const items = await Inventory.find({})
+            .populate('productId', 'name image category')
+            .limit(pageSize)
+            .skip(pageSize * (page - 1))
+            .sort({ createdAt: -1 });
+
+        res.json({ items, page, pages: Math.ceil(count / pageSize), total: count });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Search Inventory
+// @route   GET /api/inventory/search?q=
+// @access  Private/Admin
+const searchInventory = async (req, res) => {
+    try {
+        const keyword = req.query.q
+            ? {
+                  $or: [
+                      { sku: { $regex: req.query.q, $options: 'i' } },
+                      { productName: { $regex: req.query.q, $options: 'i' } }
+                  ]
+              }
+            : {};
+
+        const pageSize = 10;
+        const page = Number(req.query.pageNumber) || 1;
+
+        const count = await Inventory.countDocuments({ ...keyword });
+        const items = await Inventory.find({ ...keyword })
+            .populate('productId', 'name image category')
+            .limit(pageSize)
+            .skip(pageSize * (page - 1))
+            .sort({ createdAt: -1 });
+
+        res.json({ items, page, pages: Math.ceil(count / pageSize), total: count });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Update Inventory (quantity, price, variant)
+// @route   PUT /api/inventory/update/:id
+// @access  Private/Admin
+const updateInventory = async (req, res) => {
+    try {
+        const item = await Inventory.findById(req.params.id);
+
+        if (!item) {
+            return res.status(404).json({ message: 'Inventory item not found' });
         }
-        : {};
 
-    const count = await Inventory.countDocuments({ ...keyword });
-    const inventory = await Inventory.find({ ...keyword })
-        .populate('product', 'name image category')
-        .populate('history.user', 'name')
-        .limit(pageSize)
-        .skip(pageSize * (page - 1))
-        .sort({ updatedAt: -1 });
-
-    res.json({ inventory, page, pages: Math.ceil(count / pageSize) });
-});
-
-// @desc    Get inventory by ID
-// @route   GET /api/inventory/:id
-// @access  Private/Admin
-const getInventoryById = asyncHandler(async (req, res) => {
-    const item = await Inventory.findById(req.params.id)
-        .populate('product')
-        .populate('history.user', 'name');
-
-    if (item) {
-        res.json(item);
-    } else {
-        res.status(404);
-        throw new Error('Inventory item not found');
-    }
-});
-
-// @desc    Create new inventory item
-// @route   POST /api/inventory
-// @access  Private/Admin
-const createInventoryItem = asyncHandler(async (req, res) => {
-    const {
-        product,
-        sku,
-        variant,
-        stock,
-        pricing,
-        supplier
-    } = req.body;
-
-    const itemExists = await Inventory.findOne({ sku });
-
-    if (itemExists) {
-        res.status(400);
-        throw new Error('Inventory item with this SKU already exists');
-    }
-
-    const inventoryItem = await Inventory.create({
-        product,
-        sku,
-        variant,
-        stock,
-        pricing,
-        supplier,
-        history: [{
-            action: 'restock',
-            quantity: stock.total,
-            user: req.user._id,
-            currentStock: stock.total,
-            notes: 'Initial Stock'
-        }]
-    });
-
-    if (inventoryItem) {
-        // Optionally update Product total CountInStock if mapped 1:1 or aggregate
-        res.status(201).json(inventoryItem);
-    } else {
-        res.status(400);
-        throw new Error('Invalid inventory data');
-    }
-});
-
-// @desc    Update inventory (General Edit)
-// @route   PUT /api/inventory/:id
-// @access  Private/Admin
-const updateInventoryItem = asyncHandler(async (req, res) => {
-    const item = await Inventory.findById(req.params.id);
-
-    if (item) {
-        item.variant = req.body.variant || item.variant;
-        item.stock.threshold = req.body.stock?.threshold || item.stock.threshold;
-        item.pricing = req.body.pricing || item.pricing;
-        item.supplier = req.body.supplier || item.supplier;
+        if (req.body.stockLevel !== undefined) {
+            item.stockLevel = Number(req.body.stockLevel);
+        }
+        if (req.body.price !== undefined) {
+            item.price = Number(req.body.price);
+        }
+        if (req.body.variant !== undefined) {
+            item.variant = req.body.variant;
+        }
 
         const updatedItem = await item.save();
         res.json(updatedItem);
-    } else {
-        res.status(404);
-        throw new Error('Item not found');
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-});
+};
 
-// @desc    Adjust Stock (Restock / Damage / Correction)
-// @route   POST /api/inventory/:id/adjust
+// @desc    Delete Inventory Item
+// @route   DELETE /api/inventory/delete/:id
 // @access  Private/Admin
-const adjustStock = asyncHandler(async (req, res) => {
-    const { action, quantity, notes } = req.body;
-    const item = await Inventory.findById(req.params.id);
+const deleteInventory = async (req, res) => {
+    try {
+        const item = await Inventory.findByIdAndDelete(req.params.id);
 
-    if (!item) {
-        res.status(404);
-        throw new Error('Item not found');
-    }
-
-    const qty = Number(quantity);
-    let newTotal = item.stock.total;
-
-    if (action === 'restock') {
-        newTotal += qty;
-        if (item.supplier) {
-            item.supplier.lastRestockDate = Date.now();
+        if (!item) {
+            return res.status(404).json({ message: 'Inventory item not found' });
         }
-    } else if (action === 'adjustment' || action === 'damage' || action === 'theft') {
-        // Adjustment usually implies correction. If negative passed, deduct. 
-        // If explicit action 'damage', deduct.
-        // Let's assume input 'quantity' is absolute value, and action determines sign.
-        if (action === 'restock') {
-            newTotal += qty;
-        } else {
-            newTotal -= qty;
-        }
-    } else if (action === 'return') {
-        newTotal += qty; // Stock comes back
+
+        res.json({ message: 'Inventory removed' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-
-    // Prevent negative
-    if (newTotal < 0) {
-        res.status(400);
-        throw new Error('Stock cannot go negative');
-    }
-
-    item.stock.total = newTotal;
-
-    item.history.push({
-        action,
-        quantity: qty,
-        user: req.user._id,
-        date: Date.now(),
-        currentStock: newTotal,
-        notes
-    });
-
-    const updatedItem = await item.save();
-    res.json(updatedItem);
-});
+};
 
 // @desc    Get Inventory Stats
-// @route   GET /api/inventory/stats/metrics
+// @route   GET /api/inventory/stats
 // @access  Private/Admin
-const getInventoryStats = asyncHandler(async (req, res) => {
-    const totalItems = await Inventory.countDocuments({});
+const getStats = async (req, res) => {
+    try {
+        const items = await Inventory.find({});
+        
+        const totalItemsInStock = items.length;
+        const totalInventoryValue = items.reduce((acc, item) => acc + (item.totalValue || 0), 0);
+        const lowStockAlerts = items.filter(item => item.status === 'Low Stock').length;
+        const outOfStock = items.filter(item => item.status === 'Out of Stock').length;
 
-    // Aggregate for sums
-    const stats = await Inventory.aggregate([
-        {
-            $group: {
-                _id: null,
-                totalStockValue: { $sum: { $multiply: ["$stock.total", "$pricing.costPrice"] } },
-                totalStockCount: { $sum: "$stock.total" },
-                // Simple low stock count based on a fixed logic or need lookup
-            }
-        }
-    ]);
-
-    // Low stock query
-    // Since threshold is in the document, we can compare fields
-    const lowStockCount = await Inventory.countDocuments({
-        $expr: { $lte: ["$stock.total", "$stock.threshold"] }
-    });
-
-    const outOfStockCount = await Inventory.countDocuments({
-        "stock.total": { $lte: 0 }
-    });
-
-    res.json({
-        totalProductVariants: totalItems,
-        totalStockValue: stats[0]?.totalStockValue || 0,
-        totalStockCount: stats[0]?.totalStockCount || 0,
-        lowStockCount,
-        outOfStockCount
-    });
-});
+        res.json({
+            totalItemsInStock,
+            totalInventoryValue,
+            lowStockAlerts,
+            outOfStock
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 // @desc    Sync Inventory from Products
-// @route   POST /api/inventory/sync
+// @route   POST /api/inventory/sync-products
 // @access  Private/Admin
-const syncInventory = asyncHandler(async (req, res) => {
-    const products = await Product.find({});
-    let syncedCount = 0;
+const syncFromProducts = async (req, res) => {
+    try {
+        const products = await Product.find({});
+        let syncedCount = 0;
 
-    for (const product of products) {
-        const exists = await Inventory.findOne({ product: product._id });
-        if (!exists) {
-            await Inventory.create({
-                product: product._id,
-                sku: `SKU-${product._id.toString().slice(-6).toUpperCase()}`,
-                variant: {
-                    size: product.sizes && product.sizes.length > 0 ? product.sizes.join(', ') : 'Standard',
-                    color: product.colors && product.colors.length > 0 ? product.colors.join(', ') : 'Standard',
-                },
-                stock: {
-                    total: product.stock !== undefined ? product.stock : 0,
-                    reserved: 0,
-                    threshold: 5
-                },
-                pricing: {
-                    costPrice: Math.round((product.price || 0) * 0.7),
-                    sellingPrice: product.price || 0
-                },
-                status: 'active', // Note: status is virtual in schema but putting 'active' string here doesn't hurt as placeholder or ignored
-                history: [{
-                    action: 'restock',
-                    quantity: product.stock !== undefined ? product.stock : 0,
-                    user: req.user ? req.user._id : null, // Handle case where req.user might be missing if auth fails but middleware should catch it
-                    currentStock: product.stock !== undefined ? product.stock : 0,
-                    notes: 'Initial Sync from Product'
-                }]
-            });
-            syncedCount++;
+        for (const product of products) {
+            const existing = await Inventory.findOne({ productId: product._id });
+
+            if (!existing) {
+                const inventoryItem = new Inventory({
+                    productId: product._id,
+                    productName: product.name,
+                    sku: product.sku || "SKU-" + product._id,
+                    variant: product.variant || "Default",
+                    stockLevel: 0,
+                    price: product.price || 0
+                });
+                await inventoryItem.save();
+                syncedCount++;
+            }
         }
-    }
 
-    res.json({ message: `Synced ${syncedCount} new items from Products.` });
-});
+        const allInventory = await Inventory.find({})
+            .populate('productId', 'name image category')
+            .sort({ createdAt: -1 });
+
+        res.json({ 
+            message: `Products Synced Successfully. ${syncedCount} new records added.`, 
+            syncedCount,
+            inventory: allInventory
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 module.exports = {
+    addInventory,
     getInventory,
-    getInventoryById,
-    createInventoryItem,
-    updateInventoryItem,
-    adjustStock,
-    getInventoryStats,
-    syncInventory
+    searchInventory,
+    updateInventory,
+    deleteInventory,
+    getStats,
+    syncFromProducts
 };

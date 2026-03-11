@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const { createNotification } = require('./notificationController');
 const Product = require('../models/Product');
+const sendOrderEmails = require('../utils/sendOrderEmail');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -84,6 +85,17 @@ const createOrder = async (req, res) => {
             isAdmin: true,
             relatedId: createdOrder.id
         });
+
+        // Send Emails (Non-blocking)
+        const paymentMethod = req.body.paymentMethod || 'COD';
+        
+        sendOrderEmails({
+            _id: createdOrder.id,
+            customerName: req.user.name,
+            customerEmail: req.user.email,
+            totalAmount: total,
+            paymentMethod: paymentMethod
+        }).catch(err => console.error('Error sending order emails:', err));
 
         res.status(201).json(createdOrder);
     } catch (error) {
