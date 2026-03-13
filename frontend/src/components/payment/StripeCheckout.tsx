@@ -13,6 +13,7 @@ import {
     StripePaymentData,
 } from '../../lib/stripe';
 import { useAuth } from '@/context/AuthContext';
+import { Loader2, Lock, CreditCard, Shield } from 'lucide-react';
 
 interface StripeCheckoutProps {
     paymentData: StripePaymentData;
@@ -105,30 +106,64 @@ const StripeCheckoutForm: React.FC<StripeCheckoutProps> = ({
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                    Card Details
-                </label>
-                <CardElement options={cardElementOptions} />
-            </div>
-
-            {error && (
-                <div className="p-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded text-red-700 dark:text-red-300 text-sm">
-                    {error}
+        <form onSubmit={handleSubmit} className="relative space-y-4">
+            {/* Overlay Loader */}
+            {isLoading && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg animate-in fade-in duration-200">
+                    <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
+                    <p className="text-lg font-bold text-gradient-neon animate-pulse">
+                        Securing Payment...
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                        Please do not refresh or close this window
+                    </p>
                 </div>
             )}
 
-            <button
-                type="submit"
-                disabled={isLoading || externalLoading || !stripe}
-                className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${isLoading || externalLoading || !stripe
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
-                    }`}
-            >
-                {isLoading ? 'Processing...' : `Pay ₹${paymentData.totalPrice.toFixed(2)}`}
-            </button>
+            <div className={`space-y-4 transition-all duration-300 ${isLoading ? 'opacity-20 pointer-events-none blur-[2px]' : 'opacity-100'}`}>
+                <div className="border border-border/50 rounded-xl p-4 bg-muted/20 backdrop-blur-md shadow-inner">
+                    <div className="flex items-center justify-between mb-3">
+                        <label className="text-sm font-semibold flex items-center gap-2">
+                            <CreditCard size={16} className="text-primary" />
+                            Card Details
+                        </label>
+                        <Lock size={14} className="text-muted-foreground" />
+                    </div>
+                    <div className="p-3 bg-background/50 rounded-lg border border-border/30">
+                        <CardElement options={cardElementOptions} />
+                    </div>
+                </div>
+
+                {error && (
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm flex items-center gap-2 animate-in slide-in-from-top-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-destructive" />
+                        {error}
+                    </div>
+                )}
+
+                <button
+                    type="submit"
+                    disabled={isLoading || externalLoading || !stripe}
+                    className="w-full btn-neon py-4 text-base h-auto flex items-center justify-center gap-2 group"
+                >
+                    {isLoading ? (
+                        <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Processing Payment...
+                        </>
+                    ) : (
+                        <>
+                            <Lock size={18} className="group-hover:scale-110 transition-transform" />
+                            Pay ₹{paymentData.totalPrice.toLocaleString()} Securely
+                        </>
+                    )}
+                </button>
+                
+                <p className="text-[10px] text-center text-muted-foreground flex items-center justify-center gap-1.5 pt-2">
+                    <Shield size={10} className="text-neon-green" /> 
+                    Your payment info is encrypted & never stored
+                </p>
+            </div>
         </form>
     );
 };

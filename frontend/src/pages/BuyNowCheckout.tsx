@@ -18,12 +18,13 @@ import {
     ArrowLeft, MapPin, Plus, Check, Edit, Trash2,
     CreditCard, Smartphone, Building2, Wallet, Truck,
     Shield, RefreshCw, AlertCircle, Loader2, Tag, X,
-    ChevronDown, ChevronUp, Package
+    ChevronDown, ChevronUp, Package, ShieldCheck
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
 import { getImageUrl } from '@/lib/imageUtils';
@@ -78,6 +79,9 @@ const BuyNowCheckout = () => {
     const [couponMsg, setCouponMsg] = useState('');
     const [couponLoading, setCouponLoading] = useState(false);
     const [showCoupon, setShowCoupon] = useState(false);
+    
+    // Refs
+    const stripeRef = useRef<HTMLDivElement>(null);
 
     // ─── Init ──────────────────────────────────────────────────────────────────
     useEffect(() => {
@@ -265,7 +269,10 @@ const BuyNowCheckout = () => {
                 toast.success('Order placed! Pay on delivery 📦');
                 navigate(`/order-success?orderId=${result.orderId}&method=cod&delivery=${result.estimatedDelivery}`);
             } else if (selectedPayment === 'stripe') {
-                // ── Stripe Flow (will be handled by StripeCheckout component) ──
+                // ── Stripe Flow ──
+                // Scroll to the Stripe element for the actual payment
+                stripeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                toast.info('Please enter your card details below to complete payment');
                 setLoading(false);
             }
         } catch (error: any) {
@@ -510,8 +517,17 @@ const BuyNowCheckout = () => {
 
                             {/* ── Stripe Checkout Form ── */}
                             {selectedPayment === 'stripe' && selectedAddressId && (
-                                <div className="glass-card p-6 mt-6">
-                                    <h3 className="font-semibold mb-4 text-sm">Payment Details</h3>
+                                <div ref={stripeRef} className="glass-card p-6 mt-6 border-2 border-primary/20 shadow-neon-purple animate-in slide-in-from-bottom-5">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                                            <ShieldCheck size={20} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-lg">Secure Card Payment</h3>
+                                            <p className="text-xs text-muted-foreground">Processed by Stripe</p>
+                                        </div>
+                                    </div>
+                                    
                                     <StripeCheckout
                                         paymentData={{
                                             items: getOrderItems(),
@@ -600,9 +616,15 @@ const BuyNowCheckout = () => {
                                     ) : selectedPayment === 'cod' ? (
                                         <>Place Order — ₹{grandTotal.toLocaleString()}</>
                                     ) : (
-                                        <>Pay ₹{grandTotal.toLocaleString()} Now</>
+                                        <>Proceed to Card — <CreditCard size={18} className="ml-2" /></>
                                     )}
                                 </Button>
+                                
+                                {selectedPayment === 'stripe' && (
+                                    <p className="text-[10px] text-center text-primary font-medium animate-pulse">
+                                        ↑ Scroll up to complete card payment
+                                    </p>
+                                )}
 
                                 <p className="text-[10px] text-center text-muted-foreground leading-relaxed">
                                     By placing this order, you agree to our{' '}
