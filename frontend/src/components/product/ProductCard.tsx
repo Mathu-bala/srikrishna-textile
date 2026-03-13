@@ -47,10 +47,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
     : 0;
 
   return (
-    <Link to={`/product/${product.id}`} className="group block h-full">
+    <Link to={`/product/${product.id}`} state={{ product }} className="group block h-full">
       <div className="glass-card overflow-hidden transition-all duration-300 hover:-translate-y-[6px] hover:shadow-xl hover:shadow-black/10 hover:border-primary/50 h-full flex flex-col p-[16px]">
         {/* Image */}
-        <div className="relative h-[220px] shrink-0 w-full overflow-hidden bg-muted/30 rounded-xl">
+        <div className="relative h-[180px] sm:h-[220px] shrink-0 w-full overflow-hidden bg-muted/30 rounded-xl">
           <img
             src={getImageUrl(product.image)}
             alt={product.name}
@@ -113,10 +113,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Details */}
         <div className="p-4 flex flex-col flex-grow">
-          <p className="text-[10px] sm:text-xs text-secondary font-medium uppercase tracking-wider mb-1 line-clamp-1">
+          <p className="text-[10px] sm:text-xs text-muted-foreground font-bold uppercase tracking-[0.2em] mb-1 line-clamp-1">
             {product.fabric}
           </p>
-          <h3 className="font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors duration-300" title={product.name}>
+          <h3 className="font-black text-foreground uppercase tracking-tight line-clamp-2 group-hover:text-primary transition-colors duration-300" title={product.name}>
             {product.name}
           </h3>
 
@@ -126,19 +126,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
               <Star
                 key={i}
                 size={14}
-                className={i < Math.floor(product.rating || 4) ? 'text-[#FACC15] fill-[#FACC15]' : 'text-muted-foreground/30'}
+                className={i < Math.floor(product.rating || 4) ? 'text-[#FACC15] fill-[#FACC15]' : 'text-muted-foreground/30 shadow-sm'}
               />
             ))}
-            <span className="text-xs text-muted-foreground ml-1">({product.reviews || Math.floor(Math.random() * 500 + 50)} reviews)</span>
+            <span className="text-[10px] font-bold text-muted-foreground ml-1 uppercase tracking-widest">({product.reviews || Math.floor(Math.random() * 500 + 50)})</span>
           </div>
 
           {/* Price */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
-            <span className="font-display font-bold text-base sm:text-lg text-foreground">
+            <span className="font-black text-sm sm:text-base md:text-lg text-foreground">
               ₹{product.price.toLocaleString()}
             </span>
             {product.originalPrice && (
-              <span className="text-[11px] sm:text-sm text-muted-foreground line-through">
+              <span className="text-[10px] sm:text-[11px] md:text-sm text-muted-foreground line-through font-bold">
                 ₹{product.originalPrice.toLocaleString()}
               </span>
             )}

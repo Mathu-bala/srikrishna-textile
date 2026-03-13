@@ -1,10 +1,6 @@
 import { Product } from '@/data/products';
 
-// ── API base URL ────────────────────────────────────────────────────────────
-// Set VITE_API_URL in frontend/.env (local) and in Vercel env vars (production)
-// Example production value: https://srikrishna-api.onrender.com/api
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
+const API_URL = 'http://localhost:5000/api';
 
 export const fetchProducts = async (params: Record<string, string | boolean> = {}): Promise<Product[]> => {
     const url = new URL(`${API_URL}/products`);

@@ -168,20 +168,20 @@ const Header = () => {
         <div className="flex items-center justify-between h-14 md:h-16 lg:h-[72px] gap-2 lg:gap-3">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group shrink-0">
+          <Link to="/" className="flex items-center gap-1.5 sm:gap-2 group shrink-0">
             <div className="relative shrink-0 flex justify-center">
               <img
                 src="/logo.png"
                 alt="SriKrishna Logo"
-                className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_8px_var(--glow-primary)] dark:invert"
+                className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_8px_var(--glow-primary)] dark:invert"
               />
               <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full -z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <div className="hidden sm:flex flex-col items-start leading-none">
-              <span className="font-display font-bold text-sm md:text-base text-foreground tracking-tight whitespace-nowrap">
+            <div className="flex flex-col items-start leading-none">
+              <span className="font-display font-bold text-xs sm:text-sm md:text-base text-foreground tracking-tight whitespace-nowrap">
                 SriKrishna
               </span>
-              <span className="text-[9px] md:text-[10px] font-medium text-muted-foreground tracking-wider uppercase mt-0.5 whitespace-nowrap hidden md:block">
+              <span className="text-[8px] sm:text-[9px] md:text-[10px] font-medium text-muted-foreground tracking-wider uppercase mt-0.5 whitespace-nowrap hidden sm:block">
                 Textile Shop
               </span>
             </div>
@@ -199,10 +199,10 @@ const Header = () => {
 
             {/* Mobile search toggle */}
             <button
-              className="p-2 hover:bg-muted rounded-lg transition-colors text-foreground lg:hidden"
+              className="p-1.5 sm:p-2 hover:bg-muted rounded-lg transition-colors text-foreground lg:hidden"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
             >
-              <Search className="w-[20px] h-[20px] sm:w-[22px] sm:h-[22px]" />
+              <Search className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
             </button>
 
             {/* Home link (desktop) */}
@@ -214,10 +214,10 @@ const Header = () => {
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="p-2 hover:bg-muted rounded-lg transition-all duration-200 relative group">
-              <ShoppingCart className="w-[20px] h-[20px] sm:w-[22px] sm:h-[22px] lg:w-[24px] lg:h-[24px] text-foreground group-hover:text-secondary transition-colors" />
+            <Link to="/cart" className="p-1.5 sm:p-2 hover:bg-muted rounded-lg transition-all duration-200 relative group">
+              <ShoppingCart className="w-5 h-5 sm:w-[22px] sm:h-[22px] lg:w-[24px] lg:h-[24px] text-foreground group-hover:text-secondary transition-colors" />
               {totalItems > 0 && (
-                <span className="absolute top-0 right-0 sm:-top-1 sm:-right-1 w-4 h-4 sm:w-5 sm:h-5 bg-secondary text-secondary-foreground text-[10px] sm:text-xs rounded-full flex items-center justify-center font-medium shadow-neon-cyan">
+                <span className="absolute top-0 right-0 sm:-top-1 sm:-right-1 w-3.5 h-3.5 sm:w-5 sm:h-5 bg-secondary text-secondary-foreground text-[9px] sm:text-xs rounded-full flex items-center justify-center font-medium shadow-neon-cyan">
                   {totalItems}
                 </span>
               )}
@@ -297,12 +297,12 @@ const Header = () => {
 
             {/* Mobile hamburger */}
             <button
-              className="p-2 hover:bg-muted rounded-lg transition-colors text-foreground lg:hidden"
+              className="p-1.5 sm:p-2 hover:bg-muted rounded-lg transition-colors text-foreground lg:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen
-                ? <X className="w-[20px] h-[20px] sm:w-[22px] sm:h-[22px]" />
-                : <Menu className="w-[20px] h-[20px] sm:w-[22px] sm:h-[22px]" />}
+                ? <X className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
+                : <Menu className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />}
             </button>
           </div>
         </div>

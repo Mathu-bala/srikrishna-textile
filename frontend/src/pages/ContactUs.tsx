@@ -40,25 +40,25 @@ const ContactUs = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-background">
+        <div className="flex flex-col bg-background">
             <Header />
 
-            <main className="flex-grow">
+            <main className="w-full">
                 {/* Hero Section */}
-                <section className="relative py-20 overflow-hidden bg-primary/5">
+                <section className="relative py-6 overflow-hidden bg-primary/5">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                     <div className="container-custom relative z-10 text-center">
-                        <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
+                        <h1 className="font-display text-4xl md:text-5xl font-bold mb-2 uppercase tracking-tighter italic">
                             We're here to help – <span className="text-gradient-neon">24/7</span>
                         </h1>
-                        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                            Have questions about your order, products, or need styling advice? Our dedicated support team is available around the clock.
+                        <p className="text-muted-foreground text-sm max-w-xl mx-auto font-medium">
+                            Have questions about your order or need styling advice? Our dedicated team is available around the clock.
                         </p>
                     </div>
                 </section>
 
-                <section className="container-custom py-16">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <section className="container-custom pt-6 pb-2">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                         {/* Contact Info */}
                         <div className="space-y-8">
                             <div>
@@ -71,7 +71,7 @@ const ContactUs = () => {
                                         <div>
                                             <h3 className="font-semibold mb-1">Call Us 24/7</h3>
                                             <p className="text-muted-foreground text-sm mb-2">Speak directly with our support team anytime.</p>
-                                            <p className="text-lg font-bold text-foreground">+91 98765 43210</p>
+                                            <a href="tel:+919786632306" className="text-lg font-bold text-foreground hover:text-secondary transition-colors underline-offset-4 hover:underline">+91 97866 32306</a>
                                         </div>
                                     </div>
 
@@ -83,10 +83,8 @@ const ContactUs = () => {
                                             <h3 className="font-semibold mb-1 text-foreground">WhatsApp Support</h3>
                                             <p className="text-muted-foreground text-sm mb-3">Chat with us for quick responses.</p>
                                             <a 
-                                              href="https://wa.me/919786632306?text=Hello%20SriKrishna%20Premium%20Fashion%20I%20would%20like%20to%20know%20more%20about%20your%20products" 
-                                              target="_blank" 
-                                              rel="noopener noreferrer"
-                                              className="inline-block"
+                                              href="https://wa.me/919786632306?text=Hello%20I%20would%20like%20to%20know%20more%20about%20your%20saree%20collections" 
+                                              target="_blank" rel="noopener noreferrer" className="inline-block"
                                             >
                                               <button className="bg-[#25D366] text-white px-5 py-3 rounded-lg border-none font-bold cursor-pointer shadow-[0_4px_10px_rgba(37,211,102,0.3)] hover:shadow-[0_0_15px_rgba(37,211,102,0.6)] flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95">
                                                   <MessageCircle size={18} className="fill-current" />
@@ -103,9 +101,14 @@ const ContactUs = () => {
                                         <div>
                                             <h3 className="font-semibold mb-1">Email Support</h3>
                                             <p className="text-muted-foreground text-sm mb-2">Send us a detailed message.</p>
-                                            <a href="mailto:support@srikrishnatextiles.com" className="text-lg font-medium text-foreground hover:text-accent underline decoration-accent/50 underline-offset-4">
-                                                support@srikrishnatextiles.com
-                                            </a>
+                                            <div className="flex flex-col gap-2">
+                                                <a href="mailto:madhu.matt.matti@gmail.com" className="text-md font-medium text-foreground hover:text-accent underline decoration-accent/50 underline-offset-4 break-all">
+                                                    madhu.matt.matti@gmail.com
+                                                </a>
+                                                <a href="mailto:support@srikrishnatextiles.com" className="text-md font-medium text-foreground hover:text-accent underline decoration-accent/50 underline-offset-4 break-all">
+                                                    support@srikrishnatextiles.com
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -127,6 +130,34 @@ const ContactUs = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Google Map Integration */}
+                            <div className="glass-card overflow-hidden hover:border-primary/30 transition-all duration-500">
+                                <div className="p-6 border-b border-border/10 flex justify-between items-center">
+                                    <div className="flex items-center gap-2">
+                                        <MapPin size={20} className="text-primary" />
+                                        <h3 className="font-bold uppercase tracking-tight text-sm">Our Location</h3>
+                                    </div>
+                                    <a 
+                                      href="https://www.google.com/maps/dir/?api=1&destination=Thayilpatti,+Sivakasi,+Tamil+Nadu" 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-secondary transition-colors"
+                                    >
+                                      Get Directions
+                                    </a>
+                                </div>
+                                <div className="h-[300px] w-full bg-muted/20 relative">
+                                    <iframe 
+                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15737.52458406!2d77.8024!3d9.4533!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b06cf7a3b3a3b3b%3A0x3b3b3b3b3b3b3b3b!2sThayilpatti%2C%20Tamil%20Nadu!5e0!3m2!1sen!2sin!4v1710260751912!5m2!1sen!2sin" 
+                                        className="absolute inset-0 w-full h-full border-0"
+                                        allowFullScreen 
+                                        loading="lazy" 
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                        title="Shop Location"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         {/* Contact Form */}
@@ -138,7 +169,7 @@ const ContactUs = () => {
                                     </div>
                                     <h3 className="text-2xl font-bold mb-2">Message Sent!</h3>
                                     <p className="text-muted-foreground mb-6">
-                                        Your message has been sent successfully. Our support team will contact you shortly at <strong>{formData.email}</strong>.
+                                        Your support request has been received. Our team will contact you soon.
                                     </p>
                                     <Button onClick={() => setSubmitted(false)} variant="outline">
                                         Send Another Message
@@ -164,6 +195,16 @@ const ContactUs = () => {
                                             />
                                         </div>
                                         <div className="space-y-2">
+                                            <label htmlFor="phone" className="text-sm font-medium">Phone Number</label>
+                                            <Input
+                                                id="phone"
+                                                type="tel"
+                                                placeholder="+91 00000 00000"
+                                                required
+                                                className="bg-muted/50"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
                                             <label htmlFor="email" className="text-sm font-medium">Email</label>
                                             <Input
                                                 id="email"
@@ -175,17 +216,16 @@ const ContactUs = () => {
                                                 className="bg-muted/50"
                                             />
                                         </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label htmlFor="orderId" className="text-sm font-medium">Order ID (Optional)</label>
-                                        <Input
-                                            id="orderId"
-                                            value={formData.orderId}
-                                            onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
-                                            placeholder="e.g. ORD-123456"
-                                            className="bg-muted/50"
-                                        />
+                                        <div className="space-y-2">
+                                            <label htmlFor="orderId" className="text-sm font-medium">Order ID (Optional)</label>
+                                            <Input
+                                                id="orderId"
+                                                value={formData.orderId}
+                                                onChange={(e) => setFormData({ ...formData, orderId: e.target.value })}
+                                                placeholder="e.g. ORD-123456"
+                                                className="bg-muted/50"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div className="space-y-2">

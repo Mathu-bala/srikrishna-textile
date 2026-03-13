@@ -23,7 +23,7 @@ import FestivalBudgetPlanner from '@/components/innovative/FestivalBudgetPlanner
 import LocalShopMode from '@/components/innovative/LocalShopMode';
 import EmotionDiary from '@/components/innovative/EmotionDiary';
 import FabricTouchSimulation from '@/components/innovative/FabricTouchSimulation';
-import AIWardrobeOrganizer from '@/components/innovative/AIWardrobeOrganizer';
+// AIWardrobeOrganizer removed as file is missing
 import LanguageDialectMode from '@/components/innovative/LanguageDialectMode';
 import WeddingHarmonyChecker from '@/components/innovative/WeddingHarmonyChecker';
 
@@ -78,7 +78,7 @@ const InnovativeHub = () => {
                         <div className="animate-fade-in [animation-delay:1700ms]"><LocalShopMode /></div>
                         <div className="animate-fade-in [animation-delay:1800ms]"><EmotionDiary /></div>
                         <div className="animate-fade-in [animation-delay:1900ms]"><FabricTouchSimulation /></div>
-                        <div className="animate-fade-in [animation-delay:2000ms]"><AIWardrobeOrganizer /></div>
+                        {/* AIWardrobeOrganizer removed */}
                         <div className="animate-fade-in [animation-delay:2100ms]"><LanguageDialectMode /></div>
                         <div className="animate-fade-in [animation-delay:2200ms]"><WeddingHarmonyChecker /></div>
                     </div>

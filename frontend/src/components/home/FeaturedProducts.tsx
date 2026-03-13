@@ -223,7 +223,7 @@ const FeaturedProducts = () => {
             <Loader2 className="h-10 w-10 text-primary animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {featuredProducts.map((product, index) => (
               <div
                 key={product.id}
