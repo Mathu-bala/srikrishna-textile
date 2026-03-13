@@ -1,9 +1,9 @@
 import { Product } from '@/data/products';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = '/api';
 
 export const fetchProducts = async (params: Record<string, string | boolean> = {}): Promise<Product[]> => {
-    const url = new URL(`${API_URL}/products`);
+    const url = new URL(`${API_URL}/products`, window.location.origin);
     Object.keys(params).forEach(key => url.searchParams.append(key, String(params[key])));
 
     const res = await fetch(url.toString());
@@ -119,7 +119,7 @@ export const getSearchSuggestions = async (query: string): Promise<Product[]> =>
 // Admin User Management
 
 export const getAdminUsers = async (search?: string, page: number = 1, limit: number = 10): Promise<any> => {
-    const url = new URL(`${API_URL}/admin/users`);
+    const url = new URL(`${API_URL}/admin/users`, window.location.origin);
     if (search) url.searchParams.append('search', search);
     url.searchParams.append('page', String(page));
     url.searchParams.append('limit', String(limit));
@@ -151,7 +151,7 @@ export const updateAdminUserStatus = async (id: string, isBlocked: boolean): Pro
 
 // Admin Order Management
 export const getAdminOrders = async (params: { search?: string, status?: string, page?: number, limit?: number, sortBy?: string, order?: string } = {}): Promise<any> => {
-    const url = new URL(`${API_URL}/orders`);
+    const url = new URL(`${API_URL}/orders`, window.location.origin);
     Object.keys(params).forEach(key => {
         if (params[key as keyof typeof params]) {
             url.searchParams.append(key, String(params[key as keyof typeof params]));
