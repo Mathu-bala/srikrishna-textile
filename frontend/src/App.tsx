@@ -62,7 +62,7 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "717104013887-8a9icee4jtt4ou7qjbvvhvupjnilbsda.apps.googleusercontent.com"}>
         <AuthProvider>
           <ThemeProvider>
             <CartProvider>

@@ -29,6 +29,9 @@ const SocialLoginButtons = () => {
     const [googleLoading, setGoogleLoading] = useState(false);
     const [facebookLoading, setFacebookLoading] = useState(false);
     
+    // Safety check for Client ID
+    const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "717104013887-8a9icee4jtt4ou7qjbvvhvupjnilbsda.apps.googleusercontent.com";
+
     // ─── Google Success Handler ─────────────────────────────────────────────
     const handleGoogleSuccess = async (credentialResponse: any) => {
         setGoogleLoading(true);

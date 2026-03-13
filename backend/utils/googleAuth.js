@@ -1,5 +1,5 @@
 const { OAuth2Client } = require('google-auth-library');
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '717104013887-8a9icee4jtt4ou7qjbvvhvupjnilbsda.apps.googleusercontent.com');
 
 /**
  * Verifies a Google ID Token (Credential)
@@ -10,7 +10,7 @@ async function verifyGoogleToken(token) {
     try {
         const ticket = await client.verifyIdToken({
             idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID,
+            audience: process.env.GOOGLE_CLIENT_ID || '717104013887-8a9icee4jtt4ou7qjbvvhvupjnilbsda.apps.googleusercontent.com',
         });
         const payload = ticket.getPayload();
         return {
