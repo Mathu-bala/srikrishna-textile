@@ -15,7 +15,7 @@ import UsersManagement from '@/components/admin/UsersManagement';
 import OrdersManagement from '@/components/admin/OrdersManagement';
 import InventoryManagement from '@/components/admin/InventoryManagement';
 import ProductModal from '@/components/admin/ProductModal';
-import { isConfigured as firebaseConfigured } from '@/lib/firebase';
+const googleConfigured = !!import.meta.env.VITE_GOOGLE_CLIENT_ID && import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID_HERE';
 
 import { getImageUrl } from '@/lib/imageUtils';
 
@@ -223,7 +223,7 @@ const AdminDashboard = () => {
                     <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.2H42V20H24v8h11.3C33.7 33.1 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.3 6.5 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.8z" /><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19.1 12 24 12c3.1 0 5.8 1.1 7.9 3l5.7-5.7C34.3 6.5 29.4 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" /><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.3 0-9.7-2.9-11.3-7H5.8C9.1 38.8 16 44 24 44z" /><path fill="#1976D2" d="M43.6 20.2H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.5l6.2 5.2C40.2 35.8 44 30.4 44 24c0-1.3-.1-2.6-.4-3.8z" /></svg>
                     <div>
                       <div className="text-sm font-medium">Enable Google Login</div>
-                      <div className="text-[11px] text-muted-foreground">Requires Firebase Google OAuth setup</div>
+                      <div className="text-[11px] text-muted-foreground">Requires Google OAuth Client ID setup</div>
                     </div>
                   </div>
                   <button
@@ -244,7 +244,7 @@ const AdminDashboard = () => {
                     <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#1877F2" d="M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24c0 12 8.8 21.9 20.3 23.7V30.9h-6.1V24h6.1v-5.3c0-6 3.6-9.4 9.1-9.4 2.6 0 5.4.5 5.4.5v5.9H31c-3 0-3.9 1.9-3.9 3.7V24h6.7l-1.1 6.9h-5.6v16.8C39.2 45.9 48 36 48 24z" /><path fill="#fff" d="M33.4 30.9l1.1-6.9h-6.7v-4.5c0-1.9.9-3.7 3.9-3.7h3.1v-5.9s-2.8-.5-5.4-.5c-5.5 0-9.1 3.3-9.1 9.4V24h-6.1v6.9h6.1v16.8c1.2.2 2.5.3 3.7.3s2.5-.1 3.7-.3V30.9h5.7z" /></svg>
                     <div>
                       <div className="text-sm font-medium">Enable Facebook Login</div>
-                      <div className="text-[11px] text-muted-foreground">Requires Firebase Facebook OAuth setup</div>
+                      <div className="text-[11px] text-muted-foreground">Coming Soon (Direct OAuth)</div>
                     </div>
                   </div>
                   <button
@@ -260,30 +260,29 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Firebase Status Indicator */}
-              <div className={`mt-5 p-4 rounded-lg border ${firebaseConfigured
+              {/* Google OAuth Status Indicator */}
+              <div className={`mt-5 p-4 rounded-lg border ${googleConfigured
                   ? 'bg-neon-green/5 border-neon-green/30'
                   : 'bg-destructive/5 border-destructive/30'
                 }`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className={`text-sm font-semibold ${firebaseConfigured ? 'text-neon-green' : 'text-destructive'
+                  <span className={`text-sm font-semibold ${googleConfigured ? 'text-neon-green' : 'text-destructive'
                     }`}>
-                    {firebaseConfigured ? '✅ Firebase Connected' : '❌ Firebase Not Configured'}
+                    {googleConfigured ? '✅ Google OAuth Connected' : '❌ Google OAuth Not Configured'}
                   </span>
                 </div>
-                {!firebaseConfigured && (
+                {!googleConfigured && (
                   <ol className="text-[11px] text-muted-foreground space-y-1 list-decimal list-inside leading-relaxed">
-                    <li>Go to <span className="text-primary font-medium">console.firebase.google.com</span></li>
-                    <li>Create / open your project → Project Settings → Web App</li>
-                    <li>Copy the config values into <code className="text-primary">frontend/.env</code></li>
-                    <li>Enable Google &amp; Facebook in Authentication → Sign-in method</li>
-                    <li>Add <code className="text-primary">localhost</code> to Authorised Domains</li>
+                    <li>Go to <span className="text-primary font-medium">console.cloud.google.com</span></li>
+                    <li>Create Credentials → OAuth client ID → Web application</li>
+                    <li>Copy the Client ID into <code className="text-primary">frontend/.env</code></li>
+                    <li>Set Authorised Origins to <code className="text-primary">http://localhost:5173</code></li>
                     <li className="font-semibold text-foreground/70">Restart the dev server (Ctrl+C → npm run dev)</li>
                   </ol>
                 )}
-                {firebaseConfigured && (
+                {googleConfigured && (
                   <p className="text-[11px] text-muted-foreground">
-                    Google &amp; Facebook login buttons are active on the login page.
+                    Google login is active on the login page via official Google Identity Services.
                   </p>
                 )}
               </div>

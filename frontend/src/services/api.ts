@@ -43,17 +43,18 @@ export const registerUser = async (name: string, email: string, password: string
     return res.json();
 };
 
-// Social Login — called after Firebase OAuth succeeds
+// Social Login — called after Google/Facebook OAuth succeeds
 export const socialLoginUser = async (
     name: string,
     email: string,
     photoURL: string,
     provider: 'google' | 'facebook',
+    credential?: string
 ): Promise<any> => {
     const res = await fetch(`${API_URL}/auth/social`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, photoURL, provider }),
+        body: JSON.stringify({ name, email, photoURL, provider, credential }),
     });
     if (!res.ok) {
         const errorData = await res.json();

@@ -78,26 +78,40 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Social Login (Google / Facebook via Firebase token)
-// POST /api/auth/social
-// Body: { name, email, photoURL, provider }
-router.post('/social', async (req, res) => {
-    const { name, email, photoURL, provider } = req.body;
+const { verifyGoogleToken } = require('../utils/googleAuth');
 
-    if (!email) {
-        return res.status(400).json({ message: 'Email is required for social login' });
-    }
+// Social Login (Google / Facebook)
+// POST /api/auth/social
+// Body: { credential, provider, name, email, photoURL } (Firebase legacy support)
+router.post('/social', async (req, res) => {
+    const { credential, provider, name, email, photoURL } = req.body;
 
     try {
-        let user = await User.findOne({ email });
+        let userData = { name, email, photoURL };
+
+        // If Google and we have a credential, verify it
+        if (provider === 'google' && credential) {
+            const googleUser = await verifyGoogleToken(credential);
+            userData = {
+                name: googleUser.name,
+                email: googleUser.email,
+                photoURL: googleUser.picture
+            };
+        }
+
+        if (!userData.email) {
+            return res.status(400).json({ message: 'Email is required for social login' });
+        }
+
+        let user = await User.findOne({ email: userData.email });
 
         if (!user) {
             // New social user — create without password
             user = await User.create({
-                name: name || email.split('@')[0],
-                email,
+                name: userData.name || userData.email.split('@')[0],
+                email: userData.email,
                 password: null,
-                profilePhoto: photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+                profilePhoto: userData.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
             });
 
             // Notify admin about new social registration
@@ -109,8 +123,8 @@ router.post('/social', async (req, res) => {
             });
         } else {
             // Existing user — update photo if provided
-            if (photoURL && user.profilePhoto !== photoURL) {
-                user.profilePhoto = photoURL;
+            if (userData.photoURL && user.profilePhoto !== userData.photoURL) {
+                user.profilePhoto = userData.photoURL;
             }
             user.lastLogin = Date.now();
             await user.save();
@@ -124,7 +138,8 @@ router.post('/social', async (req, res) => {
             token: generateToken(user._id),
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Social Login Error:', error.message);
+        res.status(500).json({ message: error.message || 'Social login failed' });
     }
 });
 

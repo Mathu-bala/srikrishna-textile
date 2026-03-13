@@ -11,6 +11,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { lazy, Suspense, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SplashScreen from "@/components/layout/SplashScreen";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import Index from "./pages/Index";
 import Products from "./pages/Products";
@@ -61,75 +62,78 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <OrderProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <Sonner />
-                  
-                  <AnimatePresence mode="wait">
-                    {showSplash ? (
-                      <SplashScreen key="splash" onComplete={() => setShowSplash(false)} />
-                    ) : (
-                      <motion.div
-                        key="content"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1 }}
-                        className="min-h-screen"
-                      >
-                        <BrowserRouter>
-                          <Routes>
-                            <Route path="/" element={<Index />} />
-                            <Route path="/products" element={<Products />} />
-                            <Route path="/product/:id" element={<ProductDetail />} />
-                            <Route path="/cart" element={<Cart />} />
-                            <Route path="/buy-now-checkout" element={<BuyNowCheckout />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/wishlist" element={<Wishlist />} />
-                            <Route path="/my-orders" element={<MyOrders />} />
-                            <Route path="/orders/:orderId" element={<TrackOrder />} />
-                            <Route path="/order-success" element={<OrderSuccess />} />
-                            <Route path="/notifications" element={<Notifications />} />
-                            <Route path="/contact" element={<ContactUs />} />
-                            <Route path="/admin" element={<AdminDashboard />} />
-                            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                            <Route path="/checkout" element={<BuyNowCheckout />} />
-                            <Route path="/payment-failed" element={<PaymentFailed />} />
-                            <Route path="/profile" element={<UserProfile />} />
-                            <Route path="/admin/profile" element={<AdminProfile />} />
-                            {/* ── AI Features ── */}
-                            <Route path="/ai-features"        element={<Suspense fallback={<Spin />}><_AIFeatures /></Suspense>} />
-                            <Route path="/ai/outfit-planner"  element={<Suspense fallback={<Spin />}><_OutfitPlanner /></Suspense>} />
-                            <Route path="/ai/color-matcher"   element={<Suspense fallback={<Spin />}><_ColorMatcher /></Suspense>} />
-                            <Route path="/ai/saree-designer"  element={<Suspense fallback={<Spin />}><_SareeDesigner /></Suspense>} />
-                            <Route path="/ai/bridal-mirror"   element={<Suspense fallback={<Spin />}><_BridalMirror /></Suspense>} />
-                            <Route path="/ai/bridal-planner"  element={<Suspense fallback={<Spin />}><_BridalPlanner /></Suspense>} />
-                            <Route path="/ai/visual-search"   element={<Suspense fallback={<Spin />}><_VisualSearch /></Suspense>} />
-                            <Route path="/ai/fashion-advisor" element={<Suspense fallback={<Spin />}><_FashionAdvisor /></Suspense>} />
-                            <Route path="/ai/try-on"          element={<Suspense fallback={<Spin />}><_FashionMirror /></Suspense>} />
-                            <Route path="/ai/size-guide"      element={<Suspense fallback={<Spin />}><_SizeDetector /></Suspense>} />
-                            <Route path="/ai/fabric-knowledge" element={<Suspense fallback={<Spin />}><_FabricKnowledge /></Suspense>} />
-                            <Route path="/ai/festival-looks"  element={<Suspense fallback={<Spin />}><_FestivalLooks /></Suspense>} />
-                            <Route path="/ai/trending"        element={<Suspense fallback={<Spin />}><_Trending /></Suspense>} />
-                            <Route path="/ai/tailors"         element={<Suspense fallback={<Spin />}><_Tailors /></Suspense>} />
-                            <Route path="*" element={<NotFound />} />
-                          </Routes>
-                          {/* Global Support System & AI Chatbot — visible on all pages */}
-                          <Suspense fallback={null}><_AIChatbot /></Suspense>
-                        </BrowserRouter>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </TooltipProvider>
-              </OrderProvider>
-            </WishlistProvider>
-          </CartProvider>
-        </ThemeProvider>
-      </AuthProvider>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ""}>
+        <AuthProvider>
+          <ThemeProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <OrderProvider>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    
+                    <AnimatePresence mode="wait">
+                      {showSplash ? (
+                        <SplashScreen key="splash" onComplete={() => setShowSplash(false)} />
+                      ) : (
+                        <motion.div
+                          key="content"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 1 }}
+                          className="min-h-screen"
+                        >
+                          <BrowserRouter>
+                            <Routes>
+                              <Route path="/" element={<Index />} />
+                              <Route path="/products" element={<Products />} />
+                              <Route path="/product/:id" element={<ProductDetail />} />
+                              <Route path="/cart" element={<Cart />} />
+                              <Route path="/buy-now-checkout" element={<BuyNowCheckout />} />
+                              <Route path="/login" element={<Login />} />
+                              <Route path="/wishlist" element={<Wishlist />} />
+                              <Route path="/my-orders" element={<MyOrders />} />
+                              <Route path="/orders/:orderId" element={<TrackOrder />} />
+                              <Route path="/order-success" element={<OrderSuccess />} />
+                              <Route path="/notifications" element={<Notifications />} />
+                              <Route path="/contact" element={<ContactUs />} />
+                              <Route path="/admin" element={<AdminDashboard />} />
+                              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                              <Route path="/checkout" element={<BuyNowCheckout />} />
+                              <Route path="/payment-failed" element={<PaymentFailed />} />
+                              <Route path="/profile" element={<UserProfile />} />
+                              <Route path="/admin/profile" element={<AdminProfile />} />
+                              {/* ── AI Features ── */}
+                              <Route path="/ai-features"        element={<Suspense fallback={<Spin />}><_AIFeatures /></Suspense>} />
+                              <Route path="/ai/outfit-planner"  element={<Suspense fallback={<Spin />}><_OutfitPlanner /></Suspense>} />
+                              <Route path="/ai/color-matcher"   element={<Suspense fallback={<Spin />}><_ColorMatcher /></Suspense>} />
+                              <Route path="/ai/saree-designer"  element={<Suspense fallback={<Spin />}><_SareeDesigner /></Suspense>} />
+                              <Route path="/ai/bridal-mirror"   element={<Suspense fallback={<Spin />}><_BridalMirror /></Suspense>} />
+                              <Route path="/ai/bridal-planner"  element={<Suspense fallback={<Spin />}><_BridalPlanner /></Suspense>} />
+                              <Route path="/ai/bridal-planner"  element={<Suspense fallback={<Spin />}><_BridalPlanner /></Suspense>} />
+                              <Route path="/ai/visual-search"   element={<Suspense fallback={<Spin />}><_VisualSearch /></Suspense>} />
+                              <Route path="/ai/fashion-advisor" element={<Suspense fallback={<Spin />}><_FashionAdvisor /></Suspense>} />
+                              <Route path="/ai/try-on"          element={<Suspense fallback={<Spin />}><_FashionMirror /></Suspense>} />
+                              <Route path="/ai/size-guide"      element={<Suspense fallback={<Spin />}><_SizeDetector /></Suspense>} />
+                              <Route path="/ai/fabric-knowledge" element={<Suspense fallback={<Spin />}><_FabricKnowledge /></Suspense>} />
+                              <Route path="/ai/festival-looks"  element={<Suspense fallback={<Spin />}><_FestivalLooks /></Suspense>} />
+                              <Route path="/ai/trending"        element={<Suspense fallback={<Spin />}><_Trending /></Suspense>} />
+                              <Route path="/ai/tailors"         element={<Suspense fallback={<Spin />}><_Tailors /></Suspense>} />
+                              <Route path="*" element={<NotFound />} />
+                            </Routes>
+                            {/* Global Support System & AI Chatbot — visible on all pages */}
+                            <Suspense fallback={null}><_AIChatbot /></Suspense>
+                          </BrowserRouter>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </TooltipProvider>
+                </OrderProvider>
+              </WishlistProvider>
+            </CartProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </GoogleOAuthProvider>
     </QueryClientProvider>
   );
 };
