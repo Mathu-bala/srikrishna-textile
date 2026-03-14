@@ -15,7 +15,8 @@ import {
     Mail, 
     User, 
     Lock,
-    HelpCircle
+    HelpCircle,
+    X
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
@@ -309,7 +310,16 @@ const SecureCheckout: React.FC = () => {
     const totalAmount = paymentData.totalPrice;
 
     return (
-        <div className="min-h-screen h-full lg:flex bg-white font-sans text-[#1a1f36]">
+        <div className="min-h-screen h-full lg:flex bg-white font-sans text-[#1a1f36] relative">
+            {/* Close Button Interface */}
+            <button 
+                onClick={() => navigate(-1)}
+                className="absolute top-8 right-8 z-50 p-2 bg-white/50 backdrop-blur-sm border border-gray-200 rounded-full text-gray-400 hover:text-red-500 hover:border-red-500 transition-all shadow-sm group"
+                title="Close and go back"
+            >
+                <X size={24} className="group-hover:rotate-90 transition-transform" />
+            </button>
+
             {/* --- LEFT SECTION: Order Summary --- */}
             <div className="lg:w-1/2 bg-[#f6f9fc] p-8 sm:p-12 lg:p-20 flex flex-col justify-center">
                 <div className="max-w-md mx-auto w-full">
