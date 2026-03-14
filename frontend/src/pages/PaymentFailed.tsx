@@ -23,9 +23,9 @@ const PaymentFailed = () => {
 
     const handleRetry = () => {
         // Navigate back to checkout if it's still in session
-        const stored = sessionStorage.getItem('buyNowProduct');
+        const stored = sessionStorage.getItem('buyNowProduct') || sessionStorage.getItem('buyNowCart');
         if (stored) {
-            navigate('/buy-now-checkout');
+            navigate('/secure-checkout');
         } else {
             navigate('/products');
         }
@@ -82,7 +82,7 @@ const PaymentFailed = () => {
                             variant="outline"
                             className="w-full h-12 border-border/50 hover:border-secondary/50"
                             onClick={() => {
-                                navigate('/buy-now-checkout');
+                                navigate('/secure-checkout');
                                 // Reset to trigger getPaymentConfig again
                             }}
                         >

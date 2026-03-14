@@ -46,12 +46,12 @@ const inventorySchema = new mongoose.Schema({
 inventorySchema.pre('save', function () {
     this.totalValue = this.stockLevel * this.price;
 
-    if (this.stockLevel > 10) {
-        this.status = 'In Stock';
-    } else if (this.stockLevel >= 1 && this.stockLevel <= 10) {
+    if (this.stockLevel === 0) {
+        this.status = 'Out of Stock';
+    } else if (this.stockLevel < 10) {
         this.status = 'Low Stock';
     } else {
-        this.status = 'Out of Stock';
+        this.status = 'In Stock';
     }
 });
 

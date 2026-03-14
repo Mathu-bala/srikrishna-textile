@@ -1,0 +1,25 @@
+ M backend/controllers/inventoryController.js
+ M backend/models/Inventory.js
+ M backend/server.js
+ M frontend/src/App.tsx
+ M frontend/src/components/ThemeSwitcher.tsx
+ M frontend/src/components/admin/InventoryManagement.tsx
+ M frontend/src/components/admin/OrdersManagement.tsx
+ M frontend/src/components/ai/AIChatbot.tsx
+ M frontend/src/components/product/ProductCard.tsx
+ M frontend/src/context/CartContext.tsx
+ M frontend/src/context/ThemeContext.tsx
+ M frontend/src/index.css
+ M frontend/src/pages/AdminDashboard.tsx
+ M frontend/src/pages/Cart.tsx
+ M frontend/src/pages/PaymentFailed.tsx
+ M frontend/src/pages/ProductDetail.tsx
+ M frontend/src/pages/TrackOrder.tsx
+ M frontend/src/services/api.ts
+?? backend/models/Settings.js
+?? backend/routes/settingsRoutes.js
+?? fix_inventory_root.js
+?? frontend/src/components/support/
+?? frontend/src/pages/PaymentSuccess.tsx
+?? frontend/src/pages/SecureCheckout.tsx
+?? tmp/

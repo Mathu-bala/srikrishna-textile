@@ -30,6 +30,8 @@ import BuyNowCheckout from "./pages/BuyNowCheckout";
 import PaymentFailed from "./pages/PaymentFailed";
 import UserProfile from "./pages/UserProfile";
 import AdminProfile from "./pages/AdminProfile";
+import SecureCheckout from "./pages/SecureCheckout";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 // ── Lazy-loaded AI modules ────────────────────────────────────────────────────
 const _AIFeatures       = lazy(() => import("./pages/AIFeatures"));
@@ -48,6 +50,7 @@ const _FestivalLooks    = lazy(() => import("./components/ai/FestivalLooks"));
 const _Trending         = lazy(() => import("./components/ai/TrendingNearYou"));
 const _Tailors          = lazy(() => import("./components/ai/TailorFinder"));
 const _AIChatbot        = lazy(() => import("./components/ai/AIChatbot"));
+const WhatsAppSupport  = lazy(() => import("./components/support/WhatsAppSupport"));
 
 const Spin = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -99,7 +102,15 @@ const App = () => {
                               <Route path="/contact" element={<ContactUs />} />
                               <Route path="/admin" element={<AdminDashboard />} />
                               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                              <Route path="/admin/products" element={<AdminDashboard />} />
+                              <Route path="/admin/inventory" element={<AdminDashboard />} />
+                              <Route path="/admin/orders" element={<AdminDashboard />} />
+                              <Route path="/admin/users" element={<AdminDashboard />} />
+                              <Route path="/admin/settings" element={<AdminDashboard />} />
+                              <Route path="/admin/theme-settings" element={<AdminDashboard />} />
                               <Route path="/checkout" element={<BuyNowCheckout />} />
+                              <Route path="/secure-checkout" element={<SecureCheckout />} />
+                              <Route path="/payment-success" element={<PaymentSuccess />} />
                               <Route path="/payment-failed" element={<PaymentFailed />} />
                               <Route path="/profile" element={<UserProfile />} />
                               <Route path="/admin/profile" element={<AdminProfile />} />
@@ -122,7 +133,10 @@ const App = () => {
                               <Route path="*" element={<NotFound />} />
                             </Routes>
                             {/* Global Support System & AI Chatbot — visible on all pages */}
-                            <Suspense fallback={null}><_AIChatbot /></Suspense>
+                            <Suspense fallback={null}>
+                              <_AIChatbot />
+                              <WhatsAppSupport />
+                            </Suspense>
                           </BrowserRouter>
                         </motion.div>
                       )}

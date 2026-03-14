@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Package, AlertTriangle, Plus, Minus, Search, Edit, Save, Trash2,
   LayoutDashboard, ShoppingBag, Archive, ClipboardList, Users, LogOut, Zap,
-  IndianRupee, CheckCircle, Settings, ToggleLeft, ToggleRight
+  IndianRupee, CheckCircle, Settings, ToggleLeft, ToggleRight, Palette
 } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/context/AuthContext';
-import { fetchProducts, updateProduct, deleteProduct, getAdminOrders } from '@/services/api';
+import { fetchProducts, updateProduct, deleteProduct, getAdminOrders, getSettings, updateSettings } from '@/services/api';
 import UsersManagement from '@/components/admin/UsersManagement';
 import OrdersManagement from '@/components/admin/OrdersManagement';
 import InventoryManagement from '@/components/admin/InventoryManagement';
@@ -31,9 +31,24 @@ interface ProductStock {
 const AdminDashboard = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  
+  // Initialize active tab from URL path
+  const getTabFromPath = () => {
+    const path = location.pathname;
+    if (path.includes('/admin/products')) return 'products';
+    if (path.includes('/admin/inventory')) return 'inventory';
+    if (path.includes('/admin/orders')) return 'orders';
+    if (path.includes('/admin/users')) return 'users';
+    if (path.includes('/admin/settings')) return 'settings';
+    if (path.includes('/admin/theme-settings')) return 'theme-settings';
+    if (path.includes('/admin/dashboard')) return 'dashboard';
+    return 'dashboard';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromPath());
   const [inventory, setInventory] = useState<ProductStock[]>([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -43,6 +58,8 @@ const AdminDashboard = () => {
     googleLogin: false,
     facebookLogin: false,
   });
+  const [currentTheme, setCurrentTheme] = useState('purple');
+  const [isThemeSaving, setIsThemeSaving] = useState(false);
 
   // Initialize data
   const loadDashboardData = async () => {
@@ -78,9 +95,31 @@ const AdminDashboard = () => {
     }
   };
 
+  const loadSettings = async () => {
+    try {
+      const settings = await getSettings();
+      if (settings.themeColor) {
+        setCurrentTheme(settings.themeColor);
+      }
+    } catch (err) {
+      console.error('Failed to load settings', err);
+    }
+  };
+
   useEffect(() => {
     loadDashboardData();
+    loadSettings();
   }, []);
+
+  // Update active tab when URL changes (e.g. browser back button)
+  useEffect(() => {
+    setActiveTab(getTabFromPath());
+  }, [location.pathname]);
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    navigate(`/admin/${tabId === 'dashboard' ? 'dashboard' : tabId}`);
+  };
 
   if (!isAuthenticated || !user?.isAdmin) {
     return (
@@ -184,10 +223,83 @@ const AdminDashboard = () => {
     { id: 'orders', label: 'Orders', icon: ClipboardList },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'theme-settings', label: 'Theme Settings', icon: Palette },
   ];
+
+  const themeOptions = [
+    { id: 'purple', name: 'Neon Purple', color: 'hsl(262 83% 66%)' },
+    { id: 'blue', name: 'Blue Ocean', color: 'hsl(217 91% 60%)' },
+    { id: 'green', name: 'Green Nature', color: 'hsl(142 71% 58%)' },
+    { id: 'pink', name: 'Pink Glow', color: 'hsl(330 81% 60%)' },
+    { id: 'silver', name: 'Classic Silver', color: 'hsl(215 20% 65%)' },
+  ];
+
+  const handleThemeChange = async (themeId: string) => {
+    setCurrentTheme(themeId);
+    setIsThemeSaving(true);
+    try {
+      await updateSettings({ themeColor: themeId });
+      // Force immediate re-application by reloading ThemeContext or manually
+      window.location.reload(); // Quick way to sync across context if needed
+    } catch (err) {
+      console.error('Failed to save theme', err);
+    } finally {
+      setIsThemeSaving(false);
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'theme-settings':
+        return (
+          <>
+            <div className="mb-8">
+              <h1 className="font-display text-3xl font-bold">
+                Theme <span className="text-gradient-neon">Settings</span>
+              </h1>
+              <p className="text-muted-foreground">Customize the global appearance of the website</p>
+            </div>
+
+            <div className="glass-card p-6 max-w-lg">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                  <Palette size={18} className="text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-semibold">Global Website Theme</h2>
+                  <p className="text-xs text-muted-foreground">Select the primary accent color for all users</p>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-4 border-t border-border/50 pt-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {themeOptions.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => handleThemeChange(t.id)}
+                      disabled={isThemeSaving}
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all hover:scale-[1.02] ${
+                        currentTheme === t.id 
+                          ? 'bg-primary/10 border-primary text-primary shadow-neon-purple' 
+                          : 'bg-muted/30 border-border/50 hover:border-primary/50'
+                      }`}
+                    >
+                      <div 
+                        className="w-5 h-5 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.2)]"
+                        style={{ backgroundColor: t.color }}
+                      />
+                      <span className="text-sm font-medium">{t.name}</span>
+                      {currentTheme === t.id && <CheckCircle size={14} className="ml-auto" />}
+                    </button>
+                  ))}
+                </div>
+                {isThemeSaving && (
+                  <p className="text-[10px] text-primary animate-pulse font-medium text-center">Saving global theme style...</p>
+                )}
+              </div>
+            </div>
+          </>
+        );
       case 'users':
         return <UsersManagement />;
       case 'orders':
@@ -529,10 +641,10 @@ const AdminDashboard = () => {
               {sidebarItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                     activeTab === item.id
-                      ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-secondary border border-secondary/30'
+                      ? 'bg-primary/10 text-primary border border-primary/30 shadow-neon-purple'
                       : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   }`}
                 >
@@ -559,10 +671,10 @@ const AdminDashboard = () => {
               {sidebarItems.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleTabChange(item.id)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition-all shrink-0 ${
                     activeTab === item.id
-                      ? 'bg-gradient-to-r from-primary/20 to-accent/20 text-secondary border border-secondary/30'
+                      ? 'bg-primary/10 text-primary border border-primary/30 shadow-neon-purple'
                       : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   }`}
                 >

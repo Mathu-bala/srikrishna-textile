@@ -61,7 +61,7 @@ const Cart = () => {
     sessionStorage.setItem('buyNowCart', JSON.stringify(checkoutData));
 
     // Navigate to payment page — order will only be created after payment succeeds
-    navigate('/buy-now-checkout');
+    navigate('/secure-checkout');
   };
 
   if (cartItems.length === 0) {

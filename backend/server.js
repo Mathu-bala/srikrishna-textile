@@ -38,6 +38,7 @@ app.use('/api/support', require('./routes/supportRoutes'));
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
 app.use('/api/stripe', require('./routes/stripeRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
+app.use('/api/settings', require('./routes/settingsRoutes'));
 
 // Search suggestions endpoint
 app.get('/api/search', async (req, res) => {

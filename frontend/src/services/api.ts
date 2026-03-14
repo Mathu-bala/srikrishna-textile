@@ -203,6 +203,23 @@ export const updatePreferences = async (preferences: { themeColor?: string, mode
     return res.json();
 };
 
+// Global Settings
+export const getSettings = async (): Promise<any> => {
+    const res = await fetch(`${API_URL}/settings`);
+    if (!res.ok) throw new Error('Failed to fetch settings');
+    return res.json();
+};
+
+export const updateSettings = async (settings: { themeColor?: string }): Promise<any> => {
+    const res = await fetch(`${API_URL}/settings`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(settings)
+    });
+    if (!res.ok) throw new Error('Failed to update settings');
+    return res.json();
+};
+
 // User Orders
 export const createOrder = async (orderData: any): Promise<any> => {
     const res = await fetch(`${API_URL}/orders`, {

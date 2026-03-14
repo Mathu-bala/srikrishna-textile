@@ -13,6 +13,25 @@ const TrackOrder = () => {
     const { orders, loading } = useOrders();
     const order = orders.find((o: any) => o.id === orderId);
 
+    const formatAddress = (addressString: string) => {
+        if (!addressString) return 'Address not available';
+        try {
+            const addr = JSON.parse(addressString);
+            if (typeof addr === 'object' && addr !== null) {
+                const parts = [];
+                if (addr.street) parts.push(addr.street);
+                if (addr.city) parts.push(addr.city);
+                if (addr.state) parts.push(addr.state);
+                if (addr.zip || addr.pincode) parts.push(addr.zip || addr.pincode);
+                if (addr.country) parts.push(addr.country);
+                return parts.join(', ');
+            }
+        } catch (e) {
+            // Not JSON, return as is
+        }
+        return addressString;
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen flex flex-col">
@@ -185,39 +204,39 @@ const TrackOrder = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3, duration: 0.5 }}
-                            className="lg:col-span-2 bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-3xl shadow-sm p-6 sm:p-8"
+                            className="lg:col-span-2 bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-3xl shadow-sm p-4 sm:p-6"
                         >
-                            <h3 className="text-xl font-bold mb-6 text-slate-800 dark:text-white flex items-center gap-3">
-                                <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
-                                    <Package size={20} />
+                            <h3 className="text-lg font-bold mb-5 text-slate-800 dark:text-white flex items-center gap-2">
+                                <div className="p-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-purple-600 dark:text-purple-400">
+                                    <Package size={18} />
                                 </div>
                                 Items in this Order
                             </h3>
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {order.items.map((item: any, idx: number) => (
-                                    <div key={idx} className="group flex flex-col sm:flex-row items-start sm:items-center gap-5 py-5 border-b border-slate-100 dark:border-slate-800/80 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 p-4 rounded-2xl transition-all duration-300">
-                                        <div className="w-24 h-28 shrink-0 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm relative">
+                                    <div key={idx} className="group flex flex-col sm:flex-row items-start sm:items-center gap-4 py-4 border-b border-slate-100 dark:border-slate-800/80 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 p-3 rounded-2xl transition-all duration-300">
+                                        <div className="w-20 h-24 shrink-0 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm relative">
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
                                             <img src={getImageUrl(item.product?.image || '')} alt={item.product?.name || 'Unknown'} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                         </div>
                                         <div className="flex-grow w-full">
-                                            <p className="font-bold text-lg text-slate-800 dark:text-white leading-tight mb-2">{item.product?.name || 'Unknown Product'}</p>
-                                            <div className="flex flex-wrap gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg shadow-sm">
+                                            <p className="font-bold text-[15px] text-slate-800 dark:text-white leading-tight mb-2">{item.product?.name || 'Unknown Product'}</p>
+                                            <div className="flex flex-wrap gap-2 text-[13px] text-slate-600 dark:text-slate-300">
+                                                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-lg shadow-sm">
                                                     Price: <span className="font-bold text-slate-800 dark:text-white">₹{item.product?.price?.toLocaleString() || item.price?.toLocaleString() || 'N/A'}</span>
                                                 </div>
-                                                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg shadow-sm">
+                                                <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-lg shadow-sm">
                                                     Quantity: <span className="font-bold text-purple-600 dark:text-purple-400">{item.quantity}</span>
                                                 </div>
                                                 {item.size && (
-                                                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg shadow-sm">
+                                                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-lg shadow-sm">
                                                         Size: <span className="font-bold text-slate-800 dark:text-white">{item.size}</span>
                                                     </div>
                                                 )}
                                                 {item.color && (
-                                                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5">
+                                                    <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded-lg shadow-sm flex items-center gap-1.5">
                                                         Color: <span className="font-bold text-slate-800 dark:text-white">{item.color}</span>
-                                                        <div className="w-3 h-3 rounded-full border border-slate-300" style={{ backgroundColor: item.color.toLowerCase() }}></div>
+                                                        <div className="w-2.5 h-2.5 rounded-full border border-slate-300" style={{ backgroundColor: item.color.toLowerCase() }}></div>
                                                     </div>
                                                 )}
                                             </div>
@@ -232,42 +251,44 @@ const TrackOrder = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4, duration: 0.5 }}
-                            className="bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-3xl shadow-sm p-6 sm:p-8 h-fit flex flex-col gap-6"
+                            className="bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-3xl shadow-sm p-4 sm:p-6 h-fit flex flex-col gap-5"
                         >
                             {/* Shipping Box */}
                             <div>
-                                <h3 className="text-xl font-bold mb-4 text-slate-800 dark:text-white flex items-center gap-3">
-                                    <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg text-cyan-600 dark:text-cyan-400">
-                                        <Truck size={20} />
+                                <h3 className="text-lg font-bold mb-4 text-slate-800 dark:text-white flex items-center gap-2">
+                                    <div className="p-1.5 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg text-cyan-600 dark:text-cyan-400">
+                                        <Truck size={18} />
                                     </div>
                                     Delivery Address
                                 </h3>
-                                <div className="bg-slate-50 dark:bg-slate-800/40 p-5 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-inner">
-                                    <p className="text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed relative">
-                                        <MapPin className="absolute top-1 -left-1 text-slate-300 dark:text-slate-600 opacity-50 w-5 h-5 hidden sm:block" />
-                                        <span className="sm:pl-6 block">{order.shippingAddress}</span>
-                                    </p>
+                                <div className="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-inner">
+                                    <div className="flex items-start gap-4">
+                                        <MapPin className="text-slate-400 dark:text-slate-500 shrink-0 mt-0.5" size={16} />
+                                        <p className="text-slate-600 dark:text-slate-300 text-[14px] font-medium leading-relaxed">
+                                            {formatAddress(order.shippingAddress)}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Payment Box */}
-                            <div className="pt-6 border-t border-slate-100 dark:border-slate-800/80">
-                                <h3 className="text-lg font-bold mb-4 text-slate-800 dark:text-white flex items-center gap-2">
+                            <div className="pt-5 border-t border-slate-100 dark:border-slate-800/80">
+                                <h3 className="text-[15px] font-bold mb-3 text-slate-800 dark:text-white flex items-center gap-2">
                                     Payment Information
                                 </h3>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-100 dark:border-slate-700/60">
-                                        <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Method</span>
-                                        <span className="font-bold text-slate-800 dark:text-white">{(order as any).paymentMethod || 'Cash on Delivery'}</span>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
+                                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Method</span>
+                                        <span className="font-bold text-sm text-slate-800 dark:text-white">{(order as any).paymentMethod || 'Cash on Delivery'}</span>
                                     </div>
-                                    <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-100 dark:border-slate-700/60">
-                                        <span className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Status</span>
+                                    <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60">
+                                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Status</span>
                                         <div className="flex items-center gap-2">
-                                            <div className={`relative flex h-3 w-3`}>
+                                            <div className={`relative flex h-2.5 w-2.5`}>
                                                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${(order as any).isPaid ? 'bg-green-400' : 'bg-amber-400'}`}></span>
-                                                <span className={`relative inline-flex rounded-full h-3 w-3 ${(order as any).isPaid ? 'bg-green-500' : 'bg-amber-500'}`}></span>
+                                                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${(order as any).isPaid ? 'bg-green-500' : 'bg-amber-500'}`}></span>
                                             </div>
-                                            <span className="font-bold text-slate-800 dark:text-white">{(order as any).isPaid ? 'Paid Successfully' : 'Pending Payment'}</span>
+                                            <span className="font-bold text-sm text-slate-800 dark:text-white">{(order as any).isPaid ? 'Paid Successfully' : 'Pending Payment'}</span>
                                         </div>
                                     </div>
                                 </div>

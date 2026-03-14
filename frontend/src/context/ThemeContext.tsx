@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
-import { getPreferences, updatePreferences } from '@/services/api';
+import { getPreferences, updatePreferences, getSettings, updateSettings } from '@/services/api';
 
 type ThemeMode = 'dark' | 'light';
 type ThemeColor = 'purple' | 'blue' | 'green' | 'pink' | 'orange';
@@ -16,7 +16,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isAuthenticated } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const [mode, setModeState] = useState<ThemeMode>('dark');
     const [theme, setThemeState] = useState<ThemeColor>('purple');
 
@@ -30,16 +30,25 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             if (savedMode) setModeState(savedMode);
             if (savedTheme) setThemeState(savedTheme);
 
-            // 2. If authenticated, fetch from DB and sync
+            // 2. Fetch Global Settings (Theme Color) - Applies to everyone
+            try {
+                const settings = await getSettings();
+                if (settings.themeColor) {
+                    setThemeState(settings.themeColor as ThemeColor);
+                    localStorage.setItem('theme-color', settings.themeColor);
+                }
+            } catch (err) {
+                console.error('Failed to fetch global settings', err);
+            }
+
+            // 3. If authenticated, fetch user's personal mode preference
             if (isAuthenticated) {
                 try {
                     const prefs = await getPreferences();
-                    if (prefs.mode) setModeState(prefs.mode);
-                    if (prefs.themeColor) setThemeState(prefs.themeColor as ThemeColor);
-
-                    // Update local storage to match DB
-                    localStorage.setItem('theme-mode', prefs.mode);
-                    localStorage.setItem('theme-color', prefs.themeColor);
+                    if (prefs.mode) {
+                        setModeState(prefs.mode);
+                        localStorage.setItem('theme-mode', prefs.mode);
+                    }
                 } catch (err) {
                     console.error('Failed to load DB preferences', err);
                 }
@@ -78,13 +87,16 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     const setTheme = async (newTheme: ThemeColor) => {
+        // Update local state immediately for UI responsiveness
         setThemeState(newTheme);
         localStorage.setItem('theme-color', newTheme);
-        if (isAuthenticated) {
+        
+        // Only Admins can update the global theme
+        if (user?.isAdmin) {
             try {
-                await updatePreferences({ themeColor: newTheme });
+                await updateSettings({ themeColor: newTheme });
             } catch (err) {
-                console.error('Failed to sync theme to DB', err);
+                console.error('Failed to update global theme', err);
             }
         }
     };

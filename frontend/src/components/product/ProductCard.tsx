@@ -22,6 +22,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (product.stock === 0) return; // Prevent adding out of stock items
+    
     addToCart(
       product,
       1,
@@ -73,6 +76,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 {Math.abs(discount)}% OFF
               </span>
             )}
+            {product.stock === 0 && (
+              <span className="px-2 py-1 text-[11px] font-bold text-white bg-rose-600 rounded-full shadow-md animate-pulse">
+                OUT OF STOCK
+              </span>
+            )}
           </div>
 
           {/* Quick Actions Right Side */}
@@ -101,8 +109,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
             {/* Quick Add To Cart (Desktop Only) */}
             <button
-              className="w-9 h-9 rounded-full items-center justify-center transition-transform hover:scale-110 shadow-sm backdrop-blur-sm bg-white/90 text-foreground hover:text-primary hidden lg:flex"
+              className={`w-9 h-9 rounded-full items-center justify-center transition-transform hover:scale-110 shadow-sm backdrop-blur-sm bg-white/90 text-foreground hover:text-primary hidden lg:flex ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={handleAddToCart}
+              disabled={product.stock === 0}
             >
               <ShoppingCart size={18} />
             </button>

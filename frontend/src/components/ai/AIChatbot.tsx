@@ -268,16 +268,7 @@ export default function AIChatbot() {
           </motion.button>
         </div>
 
-        {/* 💬 WhatsApp Support (Bottom Right) */}
-        <div className="absolute bottom-6 right-6 pointer-events-auto group">
-           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }} className={`absolute right-full mr-4 top-1/2 -translate-y-1/2 px-4 py-2 rounded-xl backdrop-blur-md border text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all shadow-2xl ${mode === 'dark' ? 'bg-black/80 border-green-500/30 text-green-400' : 'bg-white/90 border-green-100 text-green-600'}`}>
-              Chat with us
-           </motion.div>
-           <motion.a initial={{ scale: 0 }} animate={{ scale: 1 }} whileHover={{ scale: 1.1, rotate: -5 }} transition={{ delay: 0.2 }} href="https://wa.me/919786632306?text=Hello%20I%20need%20help%20regarding%20your%20saree%20collections" target="_blank" rel="noopener noreferrer"
-             className="w-16 h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-2xl border border-white/20">
-              <MessageCircle size={32} className="text-white fill-white/10" />
-           </motion.a>
-        </div>
+
 
         {/* 📱 Chat Window */}
         <AnimatePresence>

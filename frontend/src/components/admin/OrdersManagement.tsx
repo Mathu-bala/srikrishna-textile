@@ -146,6 +146,25 @@ const OrdersManagement = () => {
         setIsModalOpen(true);
     };
 
+    const formatAddress = (addressString: string) => {
+        if (!addressString) return 'No Address provided';
+        try {
+            const addr = JSON.parse(addressString);
+            if (typeof addr === 'object' && addr !== null) {
+                const parts = [];
+                if (addr.street) parts.push(addr.street);
+                if (addr.city) parts.push(addr.city);
+                if (addr.state) parts.push(addr.state);
+                if (addr.zip || addr.pincode || addr.postal_code) parts.push(addr.zip || addr.pincode || addr.postal_code);
+                if (addr.country) parts.push(addr.country);
+                return parts.join(', ');
+            }
+        } catch (e) {
+            // Not JSON or parsing failed
+        }
+        return addressString;
+    };
+
     // ─── Invoice PDF Download ──────────────────────────────────────────────
     const downloadInvoice = (order: OrderData) => {
         const win = window.open('', '_blank');
@@ -204,7 +223,7 @@ const OrdersManagement = () => {
   </div>
   <div class="section">
     <h3>Delivery Address</h3>
-    <p>${order.deliveryAddress?.address || order.shippingAddress || ''}</p>
+    <p>${formatAddress(order.deliveryAddress?.address || order.shippingAddress || '')}</p>
   </div>
   <table>
     <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Amount</th></tr></thead>
@@ -413,7 +432,7 @@ const OrdersManagement = () => {
                                 <div className="glass-card p-4 bg-muted/20">
                                     <h4 className="text-xs font-bold uppercase text-muted-foreground mb-4 flex items-center gap-2"><Truck size={14} /> Shipping Address</h4>
                                     <div className="space-y-1 text-sm">
-                                        <p className="font-medium">{selectedOrder.deliveryAddress.address}</p>
+                                        <p className="font-medium">{formatAddress(selectedOrder.deliveryAddress.address)}</p>
                                     </div>
                                 </div>
                             </div>

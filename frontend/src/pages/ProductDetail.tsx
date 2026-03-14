@@ -163,6 +163,13 @@ const ProductDetail = () => {
 
             <p className="text-muted-foreground leading-relaxed text-sm font-medium">{product.description}</p>
 
+            {product.stock === 0 && (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 flex items-center gap-3 text-destructive">
+                <AlertTriangle size={20} />
+                <p className="text-sm font-bold uppercase tracking-widest">Out of Stock – This product is currently unavailable.</p>
+              </div>
+            )}
+
             {/* Configs */}
             <div className="space-y-6 pt-4">
               {product.colors && (
@@ -188,22 +195,31 @@ const ProductDetail = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
               <button 
-                onClick={() => { addToCart(product, quantity, selectedSize, selectedColor); toast.success('Added to cart!'); }} 
-                className={`flex-1 font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-[11px] shadow-xl active:scale-95 ${mode === 'dark' ? 'bg-white text-black hover:bg-zinc-200' : 'bg-black text-white hover:bg-zinc-800'}`}
+                onClick={() => { 
+                  if (product.stock > 0) {
+                    addToCart(product, quantity, selectedSize, selectedColor); 
+                    toast.success('Added to cart!'); 
+                  }
+                }} 
+                disabled={product.stock === 0}
+                className={`flex-1 font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-[11px] shadow-xl active:scale-95 ${product.stock === 0 ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-50' : (mode === 'dark' ? 'bg-white text-black hover:bg-zinc-200' : 'bg-black text-white hover:bg-zinc-800')}`}
               >
-                Add to Cart
+                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
               </button>
               <button 
                 onClick={() => { 
-                  sessionStorage.setItem('buyNowProduct', JSON.stringify({ 
-                    ...product, 
-                    quantity, 
-                    selectedSize, 
-                    selectedColor 
-                  }));
-                  navigate('/buy-now-checkout'); 
+                  if (product.stock > 0) {
+                    sessionStorage.setItem('buyNowProduct', JSON.stringify({ 
+                      ...product, 
+                      quantity, 
+                      selectedSize, 
+                      selectedColor 
+                    }));
+                    navigate('/secure-checkout'); 
+                  }
                 }} 
-                className="flex-1 bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-700 text-white font-black py-4 rounded-2xl hover:scale-[1.02] transition-all uppercase tracking-widest text-[11px] shadow-xl flex items-center justify-center gap-2"
+                disabled={product.stock === 0}
+                className={`flex-1 font-black py-4 rounded-2xl transition-all uppercase tracking-widest text-[11px] shadow-xl flex items-center justify-center gap-2 ${product.stock === 0 ? 'bg-muted text-muted-foreground cursor-not-allowed opacity-50' : 'bg-gradient-to-r from-indigo-500 via-purple-600 to-indigo-700 text-white hover:scale-[1.02]'}`}
               >
                 <Zap size={16} /> Buy Now
               </button>

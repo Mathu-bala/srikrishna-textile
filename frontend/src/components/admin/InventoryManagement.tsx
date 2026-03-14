@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
     Search, Plus, Filter,
-    AlertTriangle, DollarSign, Package, Activity, MoreVertical, RefreshCw, Trash2, Edit
+    AlertTriangle, IndianRupee, Package, Activity, MoreVertical, RefreshCw, Trash2, Edit
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -175,7 +175,7 @@ const InventoryManagement = () => {
                             <h3 className="text-2xl font-display font-bold mt-1">₹{(stats?.totalInventoryValue || 0).toLocaleString()}</h3>
                         </div>
                         <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                            <DollarSign size={20} />
+                            <IndianRupee size={20} />
                         </div>
                     </div>
                 </div>
@@ -208,7 +208,9 @@ const InventoryManagement = () => {
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-muted-foreground text-sm font-medium">Out of Stock</p>
-                            <h3 className="text-2xl font-display font-bold mt-1">{stats?.outOfStock || 0}</h3>
+                            <h3 className="text-2xl font-display font-bold mt-1">
+                                {stats?.outOfStock || 0}
+                            </h3>
                         </div>
                         <div className="p-2 bg-destructive/10 rounded-lg text-destructive">
                             <AlertTriangle size={20} />
@@ -307,13 +309,13 @@ const InventoryManagement = () => {
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${item.status === 'Out of Stock'
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium border ${item.stockLevel === 0
                                                 ? 'bg-destructive/10 text-destructive border-destructive/20'
-                                                : item.status === 'Low Stock'
+                                                : item.stockLevel < 10
                                                     ? 'bg-orange-500/10 text-orange-500 border-orange-500/20'
                                                     : 'bg-green-500/10 text-green-500 border-green-500/20'
                                                 }`}>
-                                                {item.status}
+                                                {item.stockLevel === 0 ? 'Out of Stock' : item.stockLevel < 10 ? 'Low Stock' : 'In Stock'}
                                             </span>
                                         </td>
                                         <td className="p-4 text-right">

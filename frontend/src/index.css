@@ -24,14 +24,6 @@
     --transition-speed: 0.5s;
   }
 
-  .theme-purple {
-    --primary: 262 83% 66%;
-    --secondary: 188 94% 53%;
-    --accent: 330 81% 60%;
-    --ring: 262 83% 66%;
-    --glow-primary: hsl(262 83% 66% / 0.5);
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 66%), hsl(330 81% 60%));
-  }
 
   /* Light Mode Defaults */
   .light {
@@ -131,11 +123,20 @@
 
   .theme-silver {
     --primary: 215 20% 65%;
-    --secondary: 222 47% 4%;
+    --secondary: 215 25% 85%;
     --accent: 217 91% 60%;
     --ring: 215 20% 65%;
     --glow-primary: hsl(215 20% 65% / 0.5);
-    --gradient-primary: linear-gradient(135deg, hsl(215 20% 65%), hsl(217 33% 17%));
+    --gradient-primary: linear-gradient(135deg, hsl(215 20% 65%), hsl(217 91% 60%));
+  }
+
+  .theme-purple {
+    --primary: 262 83% 66%;
+    --secondary: 188 94% 53%;
+    --accent: 330 81% 60%;
+    --ring: 262 83% 66%;
+    --glow-primary: hsl(262 83% 66% / 0.5);
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 66%), hsl(330 81% 60%));
   }
 
   * {
