@@ -125,6 +125,16 @@ const tools = [
     href: '/ai/saree-designer',
     badge: 'NEW',
   },
+  {
+    id: 'visual-scan',
+    title: 'AI Camera Visual Scan',
+    desc: 'Instant preference detection: Scan your face to automatically see Men, Women, or Kids collections tailored to you.',
+    icon: Camera,
+    color: 'from-amber-500 to-orange-600',
+    glow: 'rgba(245,158,11,0.3)',
+    href: '/ai/visual-scan',
+    badge: 'NEW',
+  },
 ];
 
 const cardVariants = {

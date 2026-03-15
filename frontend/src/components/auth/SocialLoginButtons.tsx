@@ -92,11 +92,7 @@ const SocialLoginButtons = () => {
 
             </div>
 
-            {import.meta.env.DEV && (
-                <p className="text-center text-[10px] text-muted-foreground/40 pt-1 select-none">
-                    Designed by <span className="font-semibold text-muted-foreground/60">Mathu Bala</span> – UI/UX Developer
-                </p>
-            )}
+
         </div>
     );
 };

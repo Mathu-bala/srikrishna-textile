@@ -1,7 +1,7 @@
 const Order = require('../models/Order');
 const { createNotification } = require('./notificationController');
 const Product = require('../models/Product');
-const sendOrderEmails = require('../utils/sendOrderEmail');
+const { sendOrderConfirmationEmails, sendStatusUpdateEmail } = require('../utils/sendOrderEmail');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -87,15 +87,8 @@ const createOrder = async (req, res) => {
         });
 
         // Send Emails (Non-blocking)
-        const paymentMethod = req.body.paymentMethod || 'COD';
-        
-        sendOrderEmails({
-            _id: createdOrder.id,
-            customerName: req.user.name,
-            customerEmail: req.user.email,
-            totalAmount: total,
-            paymentMethod: paymentMethod
-        }).catch(err => console.error('Error sending order emails:', err));
+        sendOrderConfirmationEmails(createdOrder, req.user)
+            .catch(err => console.error('Error sending order emails:', err));
 
         res.status(201).json(createdOrder);
     } catch (error) {
@@ -153,6 +146,14 @@ const updateOrderStatus = async (req, res) => {
                 type: 'order',
                 relatedId: order.id
             });
+
+            // Send Email Update (Non-blocking)
+            const OrderModel = require('../models/Order');
+            const populatedOrder = await OrderModel.findOne({ id: order.id }).populate('user', 'name email');
+            if (populatedOrder && populatedOrder.user) {
+                sendStatusUpdateEmail(populatedOrder, populatedOrder.user)
+                    .catch(err => console.error('Error sending status update email:', err));
+            }
 
             res.json(updatedOrder);
         } else {

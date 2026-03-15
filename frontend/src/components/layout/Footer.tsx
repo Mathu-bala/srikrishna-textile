@@ -16,7 +16,7 @@ const Footer = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="glass-card p-8 md:p-16 text-center relative overflow-hidden group bg-gradient-to-br from-indigo-500/10 via-background to-purple-500/10"
+            className="glass-card p-3 md:p-6 text-center relative overflow-hidden group bg-gradient-to-br from-indigo-500/10 via-background to-purple-500/10"
           >
             {/* Animated Background Accents */}
             <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 animate-pulse" />
@@ -28,7 +28,7 @@ const Footer = () => {
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               className="absolute top-12 left-[10%] text-primary/20 hidden lg:block"
             >
-              <Shirt size={40} />
+              <Shirt size={24} />
             </motion.div>
             
             <motion.div 
@@ -36,7 +36,7 @@ const Footer = () => {
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
               className="absolute bottom-12 left-[15%] text-secondary/20 hidden lg:block"
             >
-              <ShoppingBag size={36} />
+              <ShoppingBag size={20} />
             </motion.div>
             
             <motion.div 
@@ -44,7 +44,7 @@ const Footer = () => {
               transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
               className="absolute top-20 right-[12%] text-accent/20 hidden lg:block"
             >
-              <Palette size={44} />
+              <Palette size={28} />
             </motion.div>
 
             <div className="relative z-10">
@@ -52,29 +52,29 @@ const Footer = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-[0.2em] mb-6 border border-primary/20"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4 border border-primary/20"
               >
-                <Zap size={14} className="fill-current" />
+                <Zap size={10} className="fill-current" />
                 Limited Edition
               </motion.div>
               
-              <h2 className="font-display text-3xl sm:text-4xl md:text-6xl font-black text-foreground mb-6 tracking-tighter uppercase italic">
+              <h2 className="font-display text-lg sm:text-xl md:text-3xl font-black text-foreground mb-2 tracking-tighter uppercase italic">
                 Discover Your <span className="text-gradient-neon">Perfect Style</span>
               </h2>
               
-              <p className="text-muted-foreground mb-10 max-w-2xl mx-auto text-lg font-medium leading-relaxed">
+              <p className="text-muted-foreground mb-5 max-w-md mx-auto text-xs font-medium leading-relaxed">
                 Explore trending sarees, bridal collections, and exclusive fashion picks curated just for you. Elevation of elegance begins here.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link to="/products">
-                  <Button size="lg" className="btn-neon text-[11px] font-black uppercase tracking-[0.2em] px-10 h-14 rounded-2xl group">
+                <Link to="/products?scrollTo=products">
+                  <Button size="lg" className="btn-neon text-[8px] font-black uppercase tracking-[0.2em] px-5 h-9 rounded-lg group">
                     Explore Collection
-                    <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight size={10} className="ml-1.5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Link to="/products?newest=true">
-                  <Button variant="outline" size="lg" className="text-[11px] font-black uppercase tracking-[0.2em] px-10 h-14 rounded-2xl border-white/10 bg-white/5 hover:bg-white/10 transition-all">
+                <Link to="/products?newest=true&scrollTo=products">
+                  <Button variant="ghost" size="lg" className="text-[8px] font-black uppercase tracking-[0.2em] px-5 h-9 hover:bg-black/5 dark:hover:bg-white/5 transition-all">
                     View New Arrivals
                   </Button>
                 </Link>

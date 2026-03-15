@@ -62,6 +62,8 @@ const Products = () => {
   useEffect(() => {
     const urlQ = searchParams.get('q') || '';
     const urlCategory = searchParams.get('category') || 'all';
+    const isNewest = searchParams.get('newest') === 'true';
+    const urlSort = searchParams.get('sortBy') || (isNewest ? 'newest' : 'featured');
 
     // If URL changes externally (e.g. header search), update local state
     if (urlQ !== searchQuery) {
@@ -70,6 +72,9 @@ const Products = () => {
     }
     if (urlCategory !== selectedCategory) {
       setSelectedCategory(urlCategory);
+    }
+    if (urlSort !== sortBy) {
+      setSortBy(urlSort);
     }
   }, [searchParams]);
 
@@ -93,10 +98,14 @@ const Products = () => {
       try {
         let data: Product[] = [];
 
-        // If searching, we fetch ALL products and filter client-side for maximum control
-        // matching the "Amazon-style" fuzzy/related logic.
         if (debouncedQuery) {
-          const allProducts = await fetchProducts({});
+          // If a category is also specified, fetch only from that category to ensure subcategory accuracy
+          const fetchParams: Record<string, string | boolean> = {};
+          if (selectedCategory && selectedCategory !== 'all') {
+            fetchParams.category = selectedCategory;
+          }
+          
+          const productsSource = await fetchProducts(fetchParams);
           const rawQuery = debouncedQuery.toLowerCase().trim();
           const terms = rawQuery.split(/\s+/).filter(t => t.length > 0);
 
@@ -111,7 +120,7 @@ const Products = () => {
 
           // 1. Exact/Tight Match (AND Logic)
           // All terms must appear in the product
-          const exactMatches = allProducts.filter(p => {
+          const exactMatches = productsSource.filter(p => {
             const text = getSearchableText(p);
             return terms.every(term => text.includes(term));
           });
@@ -120,7 +129,7 @@ const Products = () => {
           // Any term appears (useful if exact matches are few)
           let partialMatches: Product[] = [];
           if (exactMatches.length < 50) {
-            partialMatches = allProducts.filter(p => {
+            partialMatches = productsSource.filter(p => {
               if (exactMatches.includes(p)) return false;
               const text = getSearchableText(p);
               // Filter out very short separate words to avoid noise
@@ -146,7 +155,7 @@ const Products = () => {
             // Infer category from existing exact matches
             exactMatches.forEach(p => matchedCategories.add(p.category.toLowerCase()));
 
-            relatedMatches = allProducts.filter(p => {
+            relatedMatches = productsSource.filter(p => {
               if (existingMatches.includes(p)) return false;
 
               // If no specific category inferred, and we are desperate, maybe gender match?
@@ -373,9 +382,11 @@ const Products = () => {
               <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-muted/50 flex items-center justify-center">
                 <Search className="h-10 w-10 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">No products found</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-2">
+                {selectedCategory !== 'all' ? `No products available in this category` : 'No products found'}
+              </h3>
               <p className="text-muted-foreground mb-6">
-                Try searching for "saree", "kurti", "shirt", or "kids wear"{selectedCategory !== 'all' ? ` in ${categories.find(c => c.id === selectedCategory)?.name}` : ''}
+                Try searching for "saree", "kurti", "shirt", or "kids wear"{selectedCategory !== 'all' ? ` in ${selectedCategory}` : ''}
               </p>
               <div className="flex flex-wrap justify-center gap-2">
                 {popularSearches.slice(0, 4).map((term) => (

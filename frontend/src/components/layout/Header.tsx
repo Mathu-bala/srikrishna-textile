@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Search, User, Menu, X, Heart, Package, LogOut, Sparkles, Bell, ChevronDown, Headphones, Download } from 'lucide-react';
+import { ShoppingCart, Search, User, Menu, X, Heart, Package, LogOut, Sparkles, Bell, ChevronDown, Headphones, Download, ArrowRight } from 'lucide-react';
 import { useState, FormEvent, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import SearchAutocomplete from '@/components/ui/SearchAutocomplete';
@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import { getNotifications } from '@/services/api';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -133,8 +134,13 @@ const Header = () => {
     }
   };
 
-  const goToCategory = (query: string) => {
-    navigate(`/products?category=${query}`);
+  const goToCategory = (cat: string, sub?: string) => {
+    if (sub) {
+      // If it's a subcategory, we can pass both or just use search for maximum accuracy
+      navigate(`/products?category=${cat}&q=${sub}`);
+    } else {
+      navigate(`/products?category=${cat}`);
+    }
     setIsMenuOpen(false);
     setOpenMobileCat(null);
   };
@@ -308,33 +314,44 @@ const Header = () => {
         </div>
 
         {/* ── Desktop category nav — hover dropdowns ────────────────────────── */}
-        <nav className="hidden lg:flex items-center justify-center gap-1 py-2 border-t border-border/50 mt-2">
+        <nav className="hidden lg:flex items-center justify-center gap-1 py-1.5 border-t border-border/30 mt-2">
           {categories.map((cat) => (
-            <div key={cat.name} className="relative group">
+            <div key={cat.name} className="relative group px-1">
               {/* Category trigger */}
               <button
                 onClick={() => goToCategory(cat.query)}
-                className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-foreground/80 hover:text-secondary transition-all duration-200 hover:drop-shadow-[0_0_8px_hsl(188_94%_53%_/_0.5)] rounded-lg hover:bg-muted/50 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-bold text-foreground/80 hover:text-primary transition-all duration-300 rounded-xl hover:bg-primary/5 whitespace-nowrap group/btn"
               >
                 {cat.name}
                 <ChevronDown
-                  size={13}
-                  className="stroke-[2.5] transition-transform duration-200 group-hover:rotate-180"
+                  size={14}
+                  className="stroke-[3] transition-transform duration-300 group-hover:rotate-180 text-muted-foreground group-hover/btn:text-primary"
                 />
               </button>
 
-              {/* Dropdown panel (CSS hover, no JS needed on desktop) */}
-              <div className="absolute top-full left-0 mt-1 w-52 bg-card/95 backdrop-blur-xl border border-border/50 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-y-1 group-hover:translate-y-0 z-50">
-                <div className="py-2 px-1">
-                  {cat.subcategories.map((sub) => (
-                    <button
-                      key={sub.query}
-                      onClick={() => goToCategory(sub.query)}
-                      className="w-full text-left px-3 py-2.5 text-sm text-foreground/80 hover:text-secondary hover:bg-primary/10 rounded-lg transition-all duration-150"
-                    >
-                      {sub.name}
-                    </button>
-                  ))}
+              {/* Dropdown panel */}
+              <div className="absolute top-full left-0 pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-50">
+                <div className="bg-card/95 backdrop-blur-2xl border border-border/50 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden">
+                  <div className="p-1.5">
+                    {cat.subcategories.map((sub) => (
+                      <button
+                        key={sub.query}
+                        onClick={() => goToCategory(cat.query, sub.name)}
+                        className="w-full text-left px-4 py-2.5 text-xs font-black uppercase tracking-widest text-foreground/70 hover:text-primary hover:bg-primary/5 rounded-xl transition-all duration-200 flex items-center justify-between group/item"
+                      >
+                        {sub.name}
+                        <ArrowRight size={12} className="opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all text-primary" />
+                      </button>
+                    ))}
+                  </div>
+                  <div className="bg-muted/30 p-2 text-center border-t border-border/30">
+                     <button 
+                        onClick={() => goToCategory(cat.query)}
+                        className="text-[10px] font-black underline uppercase tracking-tighter text-muted-foreground hover:text-primary transition-colors"
+                      >
+                       View All {cat.name}
+                     </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -430,19 +447,27 @@ const Header = () => {
                 </button>
 
                 {/* Subcategory list */}
-                {openMobileCat === cat.name && (
-                  <div className="ml-4 flex flex-col gap-1 mt-1 mb-2">
-                    {cat.subcategories.map((sub) => (
-                      <button
-                        key={sub.query}
-                        onClick={() => goToCategory(sub.query)}
-                        className="text-left py-[10px] px-[16px] text-[16px] text-foreground/60 hover:text-secondary hover:bg-muted rounded-lg font-medium transition-all duration-150"
-                      >
-                        {sub.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <AnimatePresence>
+                  {openMobileCat === cat.name && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="ml-4 flex flex-col gap-1 mt-1 mb-2 overflow-hidden"
+                    >
+                      {cat.subcategories.map((sub) => (
+                        <button
+                          key={sub.query}
+                          onClick={() => goToCategory(cat.query, sub.name)}
+                          className="text-left py-[10px] px-[16px] text-[16px] text-foreground/60 hover:text-primary hover:bg-muted rounded-lg font-medium transition-all duration-150 flex items-center justify-between"
+                        >
+                          {sub.name}
+                          <ArrowRight size={14} className="text-primary/40" />
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>

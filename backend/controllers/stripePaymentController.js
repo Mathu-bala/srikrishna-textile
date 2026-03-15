@@ -12,7 +12,8 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
 const { createNotification } = require('./notificationController');
-const { sendOrderConfirmationEmail } = require('../utils/emailService');// ─────────────────────────────────────────────────────────────────────────────
+const { sendOrderConfirmationEmail } = require('../utils/emailService');
+// ─────────────────────────────────────────────────────────────────────────────
 // Helper: validate Stripe configuration
 // ─────────────────────────────────────────────────────────────────────────────
 const validateStripeConfig = () => {

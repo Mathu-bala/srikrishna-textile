@@ -50,6 +50,7 @@ const _FestivalLooks    = lazy(() => import("./components/ai/FestivalLooks"));
 const _Trending         = lazy(() => import("./components/ai/TrendingNearYou"));
 const _Tailors          = lazy(() => import("./components/ai/TailorFinder"));
 const _AIChatbot        = lazy(() => import("./components/ai/AIChatbot"));
+const _VisualScan      = lazy(() => import("./components/ai/VisualScan"));
 const WhatsAppSupport  = lazy(() => import("./components/support/WhatsAppSupport"));
 
 const Spin = () => (
@@ -129,6 +130,7 @@ const App = () => {
                               <Route path="/ai/fabric-knowledge" element={<Suspense fallback={<Spin />}><_FabricKnowledge /></Suspense>} />
                               <Route path="/ai/festival-looks"  element={<Suspense fallback={<Spin />}><_FestivalLooks /></Suspense>} />
                               <Route path="/ai/trending"        element={<Suspense fallback={<Spin />}><_Trending /></Suspense>} />
+                              <Route path="/ai/visual-scan"     element={<Suspense fallback={<Spin />}><_VisualScan /></Suspense>} />
                               <Route path="/ai/tailors"         element={<Suspense fallback={<Spin />}><_Tailors /></Suspense>} />
                               <Route path="*" element={<NotFound />} />
                             </Routes>
