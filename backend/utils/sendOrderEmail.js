@@ -247,7 +247,7 @@ const sendStatusUpdateEmail = async (order, user) => {
     </div>
     <p>${message}</p>
     <div style="margin-top: 30px; text-align: center;">
-       <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/track-order/${order.id}" style="background: #9c27b0; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Track Order Status</a>
+       <a href="${process.env.FRONTEND_URL || 'https://srikrishna-textile.vercel.app'}/track-order/${order.id}" style="background: #9c27b0; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Track Order Status</a>
     </div>
   `;
 
